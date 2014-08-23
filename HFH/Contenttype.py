@@ -27,46 +27,46 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented, HFHException
 
-class Contenttype (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.type = None
-		self.subtype = None
-		self.params = []
-		if value is not None:
-			self.parse(value)
+class Contenttype(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.type = None
+        self.subtype = None
+        self.params = []
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[type:\'' + str(self.type) + '\', ' \
-				+ 'subtype:\'' + str(self.subtype) + '\', ' \
-				+ 'params:\'' + str(self.params) + '\']'
+    def __str__(self):
+        return '[type:\'' + str(self.type) + '\', ' \
+               + 'subtype:\'' + str(self.subtype) + '\', ' \
+               + 'params:\'' + str(self.params) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\r", "").replace("\t", "").strip()
-		sep = v.find("/")
-		if (sep != -1):
-			self.type = v[:sep]
-			st = v[sep+1:]
-			sep = st.find(";")
-			if (sep != -1):
-				self.subtype = st[:sep].strip()
-				pm = st[sep+1:]
-				self.params = pm.split(";")
-			else:
-				self.subtype = st
-		else:
-			raise HFHException("ContentType", "parse", "failed to parse because seperator '/' missing")
+    def parse(self, value):
+        v = value.replace("\r", "").replace("\t", "").strip()
+        sep = v.find("/")
+        if (sep != -1):
+            self.type = v[:sep]
+            st = v[sep + 1:]
+            sep = st.find(";")
+            if (sep != -1):
+                self.subtype = st[:sep].strip()
+                pm = st[sep + 1:]
+                self.params = pm.split(";")
+            else:
+                self.subtype = st
+        else:
+            raise HFHException("ContentType", "parse", "failed to parse because seperator '/' missing")
 
-	def create(self):
-		ret = ''
-		if self.type is not None:
-			ret = str(self.type)
-		if self.subtype is not None:
-			ret = ret + '/' + str(self.subtype)
-		for i in self.params:
-			ret = ret + ';' + i
-		return ret + '\r\n'
+    def create(self):
+        ret = ''
+        if self.type is not None:
+            ret = str(self.type)
+        if self.subtype is not None:
+            ret = ret + '/' + str(self.subtype)
+        for i in self.params:
+            ret = ret + ';' + i
+        return ret + '\r\n'
 
-	def verify(self):
-		raise SCNotImplemented("ContentType", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("ContentType", "verify", "not implemented")

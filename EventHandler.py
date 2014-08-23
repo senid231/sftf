@@ -26,19 +26,20 @@
 #
 from SCException import SCNotImplemented
 
+
 class EventHandler:
-	"""An abstract class for SIP event handling classes."""
+    """An abstract class for SIP event handling classes."""
 
-	def __init__(self):
-		pass
+    def __init__(self):
+        pass
 
-	def readEvent(self):
-		"""This function will be called to get a SIP event as return value.
-		"""
-		raise SCNotImplemented("EventHandler", "readEvent", "not implemented")
+    def readEvent(self):
+        """This function will be called to get a SIP event as return value.
+        """
+        raise SCNotImplemented("EventHandler", "readEvent", "not implemented")
 
-	def writeEvent(self, event):
-		"""This function will be called to write the given SIP event to the
-		destination.
-		"""
-		raise SCNotImplemented("EventHandler", "writeEvent", "not implemented")
+    def writeEvent(self, event):
+        """This function will be called to write the given SIP event to the
+        destination.
+        """
+        raise SCNotImplemented("EventHandler", "writeEvent", "not implemented")

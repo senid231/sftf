@@ -27,44 +27,46 @@
 from SipMessage import SipMessage
 import Helper
 
-class SipRequest (SipMessage):
-	"""This class inherits all code from SipMessage and implementes all 
-	additional function which are required to handle a SIP request.
-	"""
 
-	def __init__(self):
-		SipMessage.__init__(self)
-		self.isRequest = True
-		self.method = None
-		self.rUri = None
+class SipRequest(SipMessage):
+    """This class inherits all code from SipMessage and implementes all
+    additional function which are required to handle a SIP request.
+    """
 
-	def __str__(self):
-		return '[' + SipMessage.__str__(self) \
-				+ ', method:\'' + str(self.method) + '\', ' \
-				+ 'rUri:\'' + str(self.rUri) + '\']'
+    def __init__(self):
+        SipMessage.__init__(self)
+        self.isRequest = True
+        self.method = None
+        self.rUri = None
 
-	def parseFirstLine(self, fLine):
-		"""Tries to parse the given first line of a message as a SIP request
-		line. On succes returns True, otherwise False.
-		"""
-		try:
-			index = fLine.index(' ')
-			self.method = fLine[0:index]
-			fLine = fLine[index+1:]
-			index = fLine.index(' ')
-			self.rUri = Helper.createClassInstance("sip_uri")
-			self.rUri.parse(fLine[0:index])
-			fLine = fLine[index+1:]
-			index = fLine.index('/')
-			self.protocol = fLine[0:index]
-			if not self.protocol.lower().startswith("sip"):
-				return False
-			self.version = fLine[index+1:].replace("\n", "").replace("\r", "").rstrip()
-			return True
-		except:
-			return False
+    def __str__(self):
+        return '[' + SipMessage.__str__(self) \
+               + ', method:\'' + str(self.method) + '\', ' \
+               + 'rUri:\'' + str(self.rUri) + '\']'
 
-	def createFirstLine(self):
-		"""Creates and inserts the first line of the SIP request into the event.
-		"""
-		self.event.headers.insert(0, self.method + " " + self.rUri.create() + " " + self.protocol + "/" + self.version + "\r\n")
+    def parseFirstLine(self, fLine):
+        """Tries to parse the given first line of a message as a SIP request
+        line. On succes returns True, otherwise False.
+        """
+        try:
+            index = fLine.index(' ')
+            self.method = fLine[0:index]
+            fLine = fLine[index + 1:]
+            index = fLine.index(' ')
+            self.rUri = Helper.createClassInstance("sip_uri")
+            self.rUri.parse(fLine[0:index])
+            fLine = fLine[index + 1:]
+            index = fLine.index('/')
+            self.protocol = fLine[0:index]
+            if not self.protocol.lower().startswith("sip"):
+                return False
+            self.version = fLine[index + 1:].replace("\n", "").replace("\r", "").rstrip()
+            return True
+        except:
+            return False
+
+    def createFirstLine(self):
+        """Creates and inserts the first line of the SIP request into the event.
+        """
+        self.event.headers.insert(0,
+                                  self.method + " " + self.rUri.create() + " " + self.protocol + "/" + self.version + "\r\n")

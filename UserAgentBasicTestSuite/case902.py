@@ -30,46 +30,46 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case902 (TestCase):
 
-	def config(self):
-		self.name = "Case 902"
-		self.description = "Presence of From tag"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case902(TestCase):
+    def config(self):
+        self.name = "Case 902"
+        self.description = "Presence of From tag"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case902: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		print "  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!"
-		req = self.readMessageFromNetwork(self.neh, 60)
+        # if not self.userInteraction("case902: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE request")
-		else:
-			if req.hasHeaderField("From"):
-				if req.hasParsedHeaderField("From"):
-					frm = req.getParsedHeaderValue("From")
-					if frm.tag is None:
-						self.addResult(TestCase.TC_WARN, "missing tag in From")
-					else:
-						self.addResult(TestCase.TC_PASSED, "From contains tag")
-				else:
-					self.addResult(TestCase.TC_ERROR, "missing parsed From header")
-			else:
-				self.addResult(TestCase.TC_ERROR, "missing From header in request")
+        print("  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!")
+        req = self.readMessageFromNetwork(self.neh, 60)
 
-		self.neh.closeSock()
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE request")
+        else:
+            if req.hasHeaderField("From"):
+                if req.hasParsedHeaderField("From"):
+                    frm = req.getParsedHeaderValue("From")
+                    if frm.tag is None:
+                        self.addResult(TestCase.TC_WARN, "missing tag in From")
+                    else:
+                        self.addResult(TestCase.TC_PASSED, "From contains tag")
+                else:
+                    self.addResult(TestCase.TC_ERROR, "missing parsed From header")
+            else:
+                self.addResult(TestCase.TC_ERROR, "missing From header in request")
 
-	def onINVITE(self, message):
-		Log.logTest("rejecting received INVITE with 603")
-		repl = self.createReply(603, "Decline")
-		self.writeMessageToNetwork(self.neh, repl)
-		ack = self.readRequestFromNetwork(self.neh)
-		if ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK on negative reply")
+        self.neh.closeSock()
+
+    def onINVITE(self, message):
+        Log.logTest("rejecting received INVITE with 603")
+        repl = self.createReply(603, "Decline")
+        self.writeMessageToNetwork(self.neh, repl)
+        ack = self.readRequestFromNetwork(self.neh)
+        if ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK on negative reply")

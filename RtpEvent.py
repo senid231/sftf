@@ -26,42 +26,41 @@
 #
 
 import SCException
-import Log
-import re
 
 
 class RtpEvent:
-	"""Class instances stores all informations and content of an RTP event."""
-	def __init__(self, type=None):
-		self.srcAddress = None
-		self.dstAddress = None
-		self.received = False
-		self.time = None
-		self.rawEvent = None
-		self.data = None
-		if type is not None:
-			self.initialiseEvent(type)
+    """Class instances stores all informations and content of an RTP event."""
 
-	def __str__(self):
-		return '[srcAddress:\'' + str(self.srcAddress) + '\', ' \
-				+ 'dstAddress:\'' + str(self.dstAddress) + '\', ' \
-				+ 'received:\'' + str(self.received) + '\', ' \
-				+ 'time:\'' + str(self.time) + '\', ' \
-				+ 'rawEvent:\'' + str(self.rawEvent) + '\']'
+    def __init__(self, type=None):
+        self.srcAddress = None
+        self.dstAddress = None
+        self.received = False
+        self.time = None
+        self.rawEvent = None
+        self.data = None
+        if type is not None:
+            self.initialiseEvent(type)
 
-	def genDataString(self):
-		"""Joins the data of an RTP event to a network writeable string.
-		"""
-		ret = self.data
-		retlen = len(ret)
-		return ret, retlen
+    def __str__(self):
+        return '[srcAddress:\'' + str(self.srcAddress) + '\', ' \
+               + 'dstAddress:\'' + str(self.dstAddress) + '\', ' \
+               + 'received:\'' + str(self.received) + '\', ' \
+               + 'time:\'' + str(self.time) + '\', ' \
+               + 'rawEvent:\'' + str(self.rawEvent) + '\']'
 
-	def parseData(self, streamContext, data):
-		""" Identifies and parses an RTP message from the data
-		"""
-		sep = 0
-		ret = False
-		if streamContext is not None:
-			raise SCException.SCNotImplemented('RtpEvent', 'parseData' 'RTP over stream transport not implemented')
-		self.data = data
-		return None, True
+    def genDataString(self):
+        """Joins the data of an RTP event to a network writeable string.
+        """
+        ret = self.data
+        retlen = len(ret)
+        return ret, retlen
+
+    def parseData(self, streamContext, data):
+        """ Identifies and parses an RTP message from the data
+        """
+        sep = 0
+        ret = False
+        if streamContext is not None:
+            raise SCException.SCNotImplemented('RtpEvent', 'parseData' 'RTP over stream transport not implemented')
+        self.data = data
+        return None, True

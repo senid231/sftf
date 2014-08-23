@@ -30,70 +30,70 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case801c (TestCase):
 
-	def config(self):
-		self.name = "Case 801c"
-		self.description = "rport support"
-		self.isClient = True
-		self.transport = "UDP"
+class case801c(TestCase):
+    def config(self):
+        self.name = "Case 801c"
+        self.description = "rport support"
+        self.isClient = True
+        self.transport = "UDP"
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		inv = self.createRequest("INVITE")
-		self.writeMessageToNetwork(self.neh, inv)
+        inv = self.createRequest("INVITE")
+        self.writeMessageToNetwork(self.neh, inv)
 
-		self.repvia = None
-		self.code = 0
-		while (self.code <= 200):
-			repl = self.readReplyFromNetwork(self.neh)
-			if (repl is not None) and (repl.code > self.code):
-				self.code = repl.code
-			elif  repl is None:
-				self.code = 999
+        self.repvia = None
+        self.code = 0
+        while (self.code <= 200):
+            repl = self.readReplyFromNetwork(self.neh)
+            if (repl is not None) and (repl.code > self.code):
+                self.code = repl.code
+            elif repl is None:
+                self.code = 999
 
-		if repl is None:
-			self.addResult(TestCase.TC_ERROR, "missing reply on request")
-		if self.repvia is None:
-			self.addResult(TestCase.TC_FAILED, "missing reply to check for rport support")
-		else:
-			via = self.repvia
-			if via.rport is None:
-				self.addResult(TestCase.TC_FAILED, "rport parameter in Via not returned in reply")
-			elif via.rport == 'empty':
-				self.addResult(TestCase.TC_WARN, "rport parameter in Via returned without a value")
-			elif via.rport.isdigit() and (int(via.rport) == int(inv.event.srcAddress[1])):
-				self.addResult(TestCase.TC_PASSED, "rport parameter in Via filled with correct value")
-			else:
-				self.addResult(TestCase.TC_WARN, "rport parameter in Via filled but with in-correct value")
+        if repl is None:
+            self.addResult(TestCase.TC_ERROR, "missing reply on request")
+        if self.repvia is None:
+            self.addResult(TestCase.TC_FAILED, "missing reply to check for rport support")
+        else:
+            via = self.repvia
+            if via.rport is None:
+                self.addResult(TestCase.TC_FAILED, "rport parameter in Via not returned in reply")
+            elif via.rport == 'empty':
+                self.addResult(TestCase.TC_WARN, "rport parameter in Via returned without a value")
+            elif via.rport.isdigit() and (int(via.rport) == int(inv.event.srcAddress[1])):
+                self.addResult(TestCase.TC_PASSED, "rport parameter in Via filled with correct value")
+            else:
+                self.addResult(TestCase.TC_WARN, "rport parameter in Via filled but with in-correct value")
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-	def onDefaultCode(self, message):
-		if message.code > self.code:
-			self.code = message.code
-		if (self.repvia is None) and (message.code > 100) and (message.hasParsedHeaderField("Via")):
-			self.repvia = message.getParsedHeaderValue("Via")
-		if message.code >= 200:
-			if message.getParsedHeaderValue("CSeq").method == "INVITE":
-				Log.logDebug("case801c: sending ACK for >= 200 reply", 3)
-				ack = self.createRequest("ACK", trans=message.transaction)
-				self.writeMessageToNetwork(self.neh, ack)
-			elif message.code == 200:
-				if message.transaction.canceled:
-					Log.logDebug("case801c: received 200 for CANCEL", 3)
-				else:
-					Log.logDebug("case801c: sending BYE for accepted INVITE", 3)
-					bye = self.createRequest("BYE", dia=message.transaction.dialog)
-					self.writeMessageToNetwork(self.neh, bye)
-					rep = self.readReplyFromNetwork(self.neh)
-					if rep is None:
-						self.addResult(TestCase.TC_ERROR, "missing response on BYE")
-		else:
-			can = self.createRequest("CANCEL", trans=message.transaction)
-			message.transaction.canceled = True
-			self.writeMessageToNetwork(self.neh, can)
-			canrepl = self.readReplyFromNetwork(self.neh)
-			if canrepl is None:
-				self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")
+    def onDefaultCode(self, message):
+        if message.code > self.code:
+            self.code = message.code
+        if (self.repvia is None) and (message.code > 100) and (message.hasParsedHeaderField("Via")):
+            self.repvia = message.getParsedHeaderValue("Via")
+        if message.code >= 200:
+            if message.getParsedHeaderValue("CSeq").method == "INVITE":
+                Log.logDebug("case801c: sending ACK for >= 200 reply", 3)
+                ack = self.createRequest("ACK", trans=message.transaction)
+                self.writeMessageToNetwork(self.neh, ack)
+            elif message.code == 200:
+                if message.transaction.canceled:
+                    Log.logDebug("case801c: received 200 for CANCEL", 3)
+                else:
+                    Log.logDebug("case801c: sending BYE for accepted INVITE", 3)
+                    bye = self.createRequest("BYE", dia=message.transaction.dialog)
+                    self.writeMessageToNetwork(self.neh, bye)
+                    rep = self.readReplyFromNetwork(self.neh)
+                    if rep is None:
+                        self.addResult(TestCase.TC_ERROR, "missing response on BYE")
+        else:
+            can = self.createRequest("CANCEL", trans=message.transaction)
+            message.transaction.canceled = True
+            self.writeMessageToNetwork(self.neh, can)
+            canrepl = self.readReplyFromNetwork(self.neh)
+            if canrepl is None:
+                self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")

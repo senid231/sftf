@@ -21,15 +21,14 @@
 # $Id$
 #
 class textplain:
+    def __init__(self):
+        self.text = None
+        self.length = None
 
-	def __init__(self):
-		self.text = None
-		self.length = None
+    def __str__(self):
+        return '[text:\'' + str(self.text) + '\', ' \
+               + 'length:\'' + str(self.length) + '\']'
 
-	def __str__(self):
-		return '[text:\'' + str(self.text) + '\', ' \
-				+ 'length:\'' + str(self.length) + '\']'
-
-	def parse(self, body):
-		self.text = str(body)
-		self.length = len(self.text)
+    def parse(self, body):
+        self.text = str(body)
+        self.length = len(self.text)

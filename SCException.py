@@ -25,27 +25,29 @@
 # $Id: SCException.py,v 1.6 2004/03/19 18:37:25 lando Exp $
 #
 class SCException(Exception):
-	"""Generic internal exception class. Consits out of class name, function
-	name and the reason phrase.
-	"""
+    """Generic internal exception class. Consits out of class name, function
+    name and the reason phrase.
+    """
 
-	def __init__(self, cls, funct, reason):
-		Exception.__init__(self)
-		self.cls = cls
-		self.funct = funct
-		self.reason = reason
+    def __init__(self, cls, funct, reason):
+        Exception.__init__(self)
+        self.cls = cls
+        self.funct = funct
+        self.reason = reason
 
-	def __str__(self):
-		return str(self.cls) + '.' + str(self.funct) + '(): ' + str(self.reason)
+    def __str__(self):
+        return str(self.cls) + '.' + str(self.funct) + '(): ' + str(self.reason)
 
-class SCNotImplemented (SCException):
-	"""See SCException. Called if implementation is missing."""
 
-	def __init__(self, cls, function, reason):
-		SCException.__init__(self, cls, function, reason)
+class SCNotImplemented(SCException):
+    """See SCException. Called if implementation is missing."""
+
+    def __init__(self, cls, function, reason):
+        SCException.__init__(self, cls, function, reason)
+
 
 class HFHException(SCException):
-	"""See SCException. Called for exceptions during parsing header fields."""
+    """See SCException. Called for exceptions during parsing header fields."""
 
-	def __init__(self, cls, function, reason):
-		SCException.__init__(self, cls, function, reason)
+    def __init__(self, cls, function, reason):
+        SCException.__init__(self, cls, function, reason)

@@ -28,9 +28,9 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 import To
 
-class Referto (To.To, HeaderFieldHandler):
 
-	# __init__ , parse and create are inherited from To
+class Referto(To.To, HeaderFieldHandler):
+    # __init__ , parse and create are inherited from To
 
-	def verify(self):
-		raise SCNotImplemented("Referto", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Referto", "verify", "not implemented")

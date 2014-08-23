@@ -30,78 +30,81 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case601can (TestCase):
 
-	def config(self):
-		self.name = "Case 601can"
-		self.description = "Proper Generation of CANCEL"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case601can(TestCase):
+    def config(self):
+        self.name = "Case 601can"
+        self.description = "Proper Generation of CANCEL"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		#if not self.userInteraction("case601can: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+        # if not self.userInteraction("case601can: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		self.inv = None
-		self.can = None
-		self.invited = 0
-		self.canceled = 0
-		while self.canceled == 0:
-			if self.invited == 0:
-				print "  !!!!  PLEASE CALL ANY NUMBER/USER  !!!!"
-			else:
-				print "  !!!!  PLEASE CANCEL/HANGUP THE CALL  !!!!"
-			req = self.readMessageFromNetwork(self.neh)
+        self.inv = None
+        self.can = None
+        self.invited = 0
+        self.canceled = 0
+        while self.canceled == 0:
+            if self.invited == 0:
+                print("  !!!!  PLEASE CALL ANY NUMBER/USER  !!!!")
+            else:
+                print("  !!!!  PLEASE CANCEL/HANGUP THE CALL  !!!!")
+            req = self.readMessageFromNetwork(self.neh)
+
+        self.neh.closeSock()
+
+        if self.inv is not None:
+            if self.inv.hasHeaderField("Via"):
+                req_via = self.inv.getHeaderValue("Via")
+            else:
+                Log.logDebug("case601can: missing Via header in INVITE", 1)
+                Log.logTest("case601can: missing Via header in INVITE")
+                self.addResult(TestCase.TC_ERROR, "missing Via in first INVITE")
+        if self.can is not None:
+            if self.can.hasHeaderField("Via"):
+                can_via = self.can.getHeaderValue("Via")
+            else:
+                Log.logDebug("case601can: missing Via header in CANCEL", 1)
+                Log.logTest("case601can: missing Via header in CANCEL")
+                self.addResult(TestCase.TC_ERROR, "missing Via in CANCEL")
+
+            if self.inv.rUri != self.can.rUri:
+                Log.logDebug(
+                    "case601can: INVITE uri (\'" + str(self.inv.rUri.create()) + "\') and CANCEL uri (\'" + str(
+                        self.can.rUri.create()) + "\') differ", 1)
+                Log.logTest("case601: INVITE and CANCEL request uri do not match")
+                self.addResult(TestCase.TC_FAILED, "INVITE and CANCEL uri differ")
+            elif req_via != can_via:
+                Log.logDebug(
+                    "case601can: INVITE topmost Via (\'" + str(req_via) + "\') and CANCEL topmost Via (\'" + str(
+                        can_via) + "\') differ", 1)
+                Log.logTest("case601can: topmost Via of INVITE and CANCEL differ")
+                self.addResult(TestCase.TC_FAILED, "INVITE and CANCEL topmost Via differ")
+            else:
+                Log.logDebug("case601can: request uri and topmost Via of INVITE and CANCEL are equal", 2)
+                Log.logTest("case601can: r-uri and Via of INVITE and CANCEL are equal")
+                self.addResult(TestCase.TC_PASSED, "r-uri and Via of INVITE and CANCEL are equal")
 
 
-		self.neh.closeSock()
+    def onINVITE(self, message):
+        self.inv = message
+        repl180 = self.createReply(180, "Ringing")
+        self.writeMessageToNetwork(self.neh, repl180)
+        self.invited = 1
 
-		if self.inv is not None:
-			if self.inv.hasHeaderField("Via"):
-				req_via = self.inv.getHeaderValue("Via")
-			else:
-				Log.logDebug("case601can: missing Via header in INVITE", 1)
-				Log.logTest("case601can: missing Via header in INVITE")
-				self.addResult(TestCase.TC_ERROR, "missing Via in first INVITE")
-		if self.can is not None:
-			if self.can.hasHeaderField("Via"):
-				can_via = self.can.getHeaderValue("Via")
-			else:
-				Log.logDebug("case601can: missing Via header in CANCEL", 1)
-				Log.logTest("case601can: missing Via header in CANCEL")
-				self.addResult(TestCase.TC_ERROR, "missing Via in CANCEL")
-
-			if self.inv.rUri != self.can.rUri:
-				Log.logDebug("case601can: INVITE uri (\'" + str(self.inv.rUri.create()) + "\') and CANCEL uri (\'" + str(self.can.rUri.create()) + "\') differ", 1)
-				Log.logTest("case601: INVITE and CANCEL request uri do not match")
-				self.addResult(TestCase.TC_FAILED, "INVITE and CANCEL uri differ")
-			elif req_via != can_via:
-				Log.logDebug("case601can: INVITE topmost Via (\'" + str(req_via) + "\') and CANCEL topmost Via (\'" + str(can_via) + "\') differ", 1)
-				Log.logTest("case601can: topmost Via of INVITE and CANCEL differ")
-				self.addResult(TestCase.TC_FAILED, "INVITE and CANCEL topmost Via differ")
-			else:
-				Log.logDebug("case601can: request uri and topmost Via of INVITE and CANCEL are equal", 2)
-				Log.logTest("case601can: r-uri and Via of INVITE and CANCEL are equal")
-				self.addResult(TestCase.TC_PASSED, "r-uri and Via of INVITE and CANCEL are equal")
-
-
-	def onINVITE(self, message):
-		self.inv = message
-		repl180 = self.createReply(180, "Ringing")
-		self.writeMessageToNetwork(self.neh, repl180)
-		self.invited = 1
-	
-	def onCANCEL(self, message):
-		self.can = message
-		repl200 = self.createReply(200, "OK", mes=message)
-		self.writeMessageToNetwork(self.neh, repl200)
-		repl487 = self.createReply(487, "Request Terminated", mes=self.inv)
-		self.writeMessageToNetwork(self.neh, repl487)
-		self.canceled = 1
-		self.ack = self.readRequestFromNetwork(self.neh)
-		if self.ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK for 487")
+    def onCANCEL(self, message):
+        self.can = message
+        repl200 = self.createReply(200, "OK", mes=message)
+        self.writeMessageToNetwork(self.neh, repl200)
+        repl487 = self.createReply(487, "Request Terminated", mes=self.inv)
+        self.writeMessageToNetwork(self.neh, repl487)
+        self.canceled = 1
+        self.ack = self.readRequestFromNetwork(self.neh)
+        if self.ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK for 487")

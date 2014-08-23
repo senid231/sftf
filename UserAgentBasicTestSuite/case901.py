@@ -30,49 +30,49 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case901 (TestCase):
 
-	def config(self):
-		self.name = "Case 901"
-		self.description = "Presence of RFC3261 branch ID in Via"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case901(TestCase):
+    def config(self):
+        self.name = "Case 901"
+        self.description = "Presence of RFC3261 branch ID in Via"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case901: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		print "  !!!! PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!"
-		req = self.readRequestFromNetwork(self.neh, 60)
+        # if not self.userInteraction("case901: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE request")
-		else:
-			if req.hasHeaderField("Via"):
-				if req.hasParsedHeaderField("Via"):
-					via = req.getParsedHeaderValue("Via")
-					if via.branch is None:
-						self.addResult(TestCase.TC_WARN, "missing branch in Via")
-					else:
-						if via.branch.startswith("z9hG4bK"):
-							self.addResult(TestCase.TC_PASSED, "branch value begins with magic cookie \'z9hG4bK\'")
-						else:
-							self.addResult(TestCase.TC_WARN, "Via branch does not begin with magic cookie \'z9hG4bK\'")
-				else:
-					self.addResult(TestCase.TC_ERROR, "missing parsed Via header")
-			else:
-				self.addResult(TestCase.TC_ERROR, "missing Via header in request")
+        print("  !!!! PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!")
+        req = self.readRequestFromNetwork(self.neh, 60)
 
-		self.neh.closeSock()
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE request")
+        else:
+            if req.hasHeaderField("Via"):
+                if req.hasParsedHeaderField("Via"):
+                    via = req.getParsedHeaderValue("Via")
+                    if via.branch is None:
+                        self.addResult(TestCase.TC_WARN, "missing branch in Via")
+                    else:
+                        if via.branch.startswith("z9hG4bK"):
+                            self.addResult(TestCase.TC_PASSED, "branch value begins with magic cookie \'z9hG4bK\'")
+                        else:
+                            self.addResult(TestCase.TC_WARN, "Via branch does not begin with magic cookie \'z9hG4bK\'")
+                else:
+                    self.addResult(TestCase.TC_ERROR, "missing parsed Via header")
+            else:
+                self.addResult(TestCase.TC_ERROR, "missing Via header in request")
 
-	def onINVITE(self, message):
-		Log.logTest("rejecteing received INVITE with 603")
-		repl = self.createReply(603, "Decline")
-		self.writeMessageToNetwork(self.neh, repl)
-		ack = self.readRequestFromNetwork(self.neh)
-		if ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK on negative reply")
+        self.neh.closeSock()
+
+    def onINVITE(self, message):
+        Log.logTest("rejecteing received INVITE with 603")
+        repl = self.createReply(603, "Decline")
+        self.writeMessageToNetwork(self.neh, repl)
+        ack = self.readRequestFromNetwork(self.neh)
+        if ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK on negative reply")

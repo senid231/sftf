@@ -27,26 +27,26 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
-class Expires (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.seconds = None
-		if value is not None:
-			self.parse(value)
+class Expires(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.seconds = None
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[seconds:\'' + str(self.seconds) + '\']'
+    def __str__(self):
+        return '[seconds:\'' + str(self.seconds) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\t", "").replace("\r", "").strip()
-		self.seconds = int(v)
+    def parse(self, value):
+        v = value.replace("\t", "").replace("\r", "").strip()
+        self.seconds = int(v)
 
-	def create(self):
-		if self.seconds is not None:
-			return str(self.seconds) + "\r\n"
-		else:
-			return "\r\n"
+    def create(self):
+        if self.seconds is not None:
+            return str(self.seconds) + "\r\n"
+        else:
+            return "\r\n"
 
-	def verify(self):
-		raise SCNotImplemented("Expires", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Expires", "verify", "not implemented")

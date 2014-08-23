@@ -27,25 +27,25 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
+
 class Allow(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.methods = []
+        if value is not None:
+            self.parse(value)
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.methods = []
-		if value is not None:
-			self.parse(value)
+    def __str__(self):
+        return '[methods:\'' + str(self.methods) + '\']'
 
-	def __str__(self):
-		return '[methods:\'' + str(self.methods) + '\']'
+    def parse(self, value):
+        self.methods = list(map(str.strip, value.replace("\r", "").replace("\t", "").split(",")))
 
-	def parse(self, value):
-		self.methods = map(str.strip, value.replace("\r", "").replace("\t", "").split(","))
+    def create(self):
+        ret = ""
+        for i in self.methods:
+            ret = ret + ", " + i
+        return ret[2:] + "\r\n"
 
-	def create(self):
-		ret = ""
-		for i in self.methods:
-			ret = ret + ", " + i
-		return ret[2:] + "\r\n"
-
-	def verify(self):
-		raise SCNotImplemented("Allow", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Allow", "verify", "not implemented")

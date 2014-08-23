@@ -21,38 +21,38 @@
 # $Id$
 #
 from HeaderFieldHandler import HeaderFieldHandler
-from SCException import SCNotImplemented, HFHException
+from SCException import SCNotImplemented
 
-class Contentdisposition (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.type = None
-		self.params = []
-		if value is not None:
-			self.parse(value)
+class Contentdisposition(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.type = None
+        self.params = []
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[type:\'' + str(self.type) + '\', ' \
-				+ 'params:\'' + str(self.params) + '\']'
+    def __str__(self):
+        return '[type:\'' + str(self.type) + '\', ' \
+               + 'params:\'' + str(self.params) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\r", "").replace("\t", "").strip()
-		sep = v.find(";")
-		if (sep != -1):
-			self.type = v[:sep].strip()
-			pm = v[sep+1:]
-			self.params = pm.split(";")
-		else:
-			self.type = v
+    def parse(self, value):
+        v = value.replace("\r", "").replace("\t", "").strip()
+        sep = v.find(";")
+        if (sep != -1):
+            self.type = v[:sep].strip()
+            pm = v[sep + 1:]
+            self.params = pm.split(";")
+        else:
+            self.type = v
 
-	def create(self):
-		ret = ''
-		if self.type is not None:
-			ret = str(self.type)
-		for i in self.params:
-			ret = ret + ';' + i
-		return ret + '\r\n'
+    def create(self):
+        ret = ''
+        if self.type is not None:
+            ret = str(self.type)
+        for i in self.params:
+            ret = ret + ';' + i
+        return ret + '\r\n'
 
-	def verify(self):
-		raise SCNotImplemented("ContentDisposition", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("ContentDisposition", "verify", "not implemented")

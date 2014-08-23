@@ -28,12 +28,12 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 import Contenttype
 
-class Accept (Contenttype.Contenttype, HeaderFieldHandler):
 
-	# __init__ , parse and create are inherited from Contenttype
-	# Note: Content-Type and Accept are not exactly the same, but
-	#       as we do not parse the details it should not matter.
-	#       BUT the verify method should not be the same!
+class Accept(Contenttype.Contenttype, HeaderFieldHandler):
+    # __init__ , parse and create are inherited from Contenttype
+    # Note: Content-Type and Accept are not exactly the same, but
+    # as we do not parse the details it should not matter.
+    # BUT the verify method should not be the same!
 
-	def verify(self):
-		raise SCNotImplemented("Accept", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Accept", "verify", "not implemented")

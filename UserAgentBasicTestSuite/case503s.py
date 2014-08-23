@@ -28,55 +28,57 @@
 #
 from TestCase import TestCase
 import NetworkEventHandler as NEH
-import Log, Config
-
-class case503s (TestCase):
-
-	def config(self):
-		self.name = "Case 503s"
-		self.description = "Ignore Record-Route from negative replies"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
-
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-
-		#if not self.userInteraction("case503s: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
-
-		self.replied = 0
-		while self.replied == 0:
-			print "  !!!!  PLEASE CALL ANY NUMBER/USER  !!!!"
-			self.readMessageFromNetwork(self.neh, 30)
-
-		self.neh.closeSock()
-
-		if self.ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK on 404 reply")
-		else:
-			if self.ack.hasHeaderField("Route"):
-				Log.logDebug("case503s: ACK contains Route header (\'" + str(self.ack.getHeaderValue("Route")) + "\') created from RR in 404 reply", 1)
-				Log.logTest("case503s: ACK contains Route header from RR in negative reply")
-				self.addResult(TestCase.TC_FAILED, "ACK contains Route from RR in negative reply")
-			else:
-				Log.logDebug("case503s: even though RR in reply, no Route header in ACK", 2)
-				Log.logTest("case503s: Route header omitted because of negative reply")
-				self.addResult(TestCase.TC_PASSED, "Route header omitted because of negative reply")
+import Log
+import Config
 
 
-	def onINVITE(self, message):
-		# FIXME is an ACK ok, or do we need to see another request from the
-		# UAC to see it fail?
-		repl = self.createReply(404, "Not Found")
-		rr = self.getParsedHeaderInstance("Record-Route")
-		rr.uri.protocol = "sip"
-		rr.uri.host = Config.LOCAL_IP
-		rr.uri.port = Config.LOCAL_PORT
-		repl.setParsedHeaderValue("Record-Route", rr)
-		repl.setHeaderValue("Record-Route", rr.create())
-		repl.transaction.dialog.ignoreRoute = True
-		self.writeMessageToNetwork(self.neh, repl)
-		self.replied = 1
-		self.ack = self.readRequestFromNetwork(self.neh)
+class case503s(TestCase):
+    def config(self):
+        self.name = "Case 503s"
+        self.description = "Ignore Record-Route from negative replies"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
+
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
+
+        # if not self.userInteraction("case503s: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
+
+        self.replied = 0
+        while self.replied == 0:
+            print("  !!!!  PLEASE CALL ANY NUMBER/USER  !!!!")
+            self.readMessageFromNetwork(self.neh, 30)
+
+        self.neh.closeSock()
+
+        if self.ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK on 404 reply")
+        else:
+            if self.ack.hasHeaderField("Route"):
+                Log.logDebug("case503s: ACK contains Route header (\'" + str(
+                    self.ack.getHeaderValue("Route")) + "\') created from RR in 404 reply", 1)
+                Log.logTest("case503s: ACK contains Route header from RR in negative reply")
+                self.addResult(TestCase.TC_FAILED, "ACK contains Route from RR in negative reply")
+            else:
+                Log.logDebug("case503s: even though RR in reply, no Route header in ACK", 2)
+                Log.logTest("case503s: Route header omitted because of negative reply")
+                self.addResult(TestCase.TC_PASSED, "Route header omitted because of negative reply")
+
+
+    def onINVITE(self, message):
+        # FIXME is an ACK ok, or do we need to see another request from the
+        # UAC to see it fail?
+        repl = self.createReply(404, "Not Found")
+        rr = self.getParsedHeaderInstance("Record-Route")
+        rr.uri.protocol = "sip"
+        rr.uri.host = Config.LOCAL_IP
+        rr.uri.port = Config.LOCAL_PORT
+        repl.setParsedHeaderValue("Record-Route", rr)
+        repl.setHeaderValue("Record-Route", rr.create())
+        repl.transaction.dialog.ignoreRoute = True
+        self.writeMessageToNetwork(self.neh, repl)
+        self.replied = 1
+        self.ack = self.readRequestFromNetwork(self.neh)

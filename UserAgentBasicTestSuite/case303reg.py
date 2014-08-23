@@ -28,77 +28,82 @@
 #
 from TestCase import TestCase
 import NetworkEventHandler as NEH
-import Log, Config
+import Log
+import Config
 
-class case303reg (TestCase):
 
-	def config(self):
-		self.name = "Case 303reg"
-		self.description = "Digest Authentication of REGISTER with qop"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
-		self.register = True
+class case303reg(TestCase):
+    def config(self):
+        self.name = "Case 303reg"
+        self.description = "Digest Authentication of REGISTER with qop"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
+        self.register = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case303reg: proceed when ready to send REGISTER"):
-		#	neh.closeSock()
-		#	return
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		print "  !!!! PLEASE REGISTER WITH USERNAME='" + str(Config.TEST_USER_NAME) + "' and PASSWORD='" + str(Config.TEST_USER_PASSWORD) + "' WITHIN 5 MINUTES !!!!"
-		self.challenged = 0
-		req = self.readMessageFromNetwork(self.neh, 300, RequestMethod="REGISTER")
+        # if not self.userInteraction("case303reg: proceed when ready to send REGISTER"):
+        # neh.closeSock()
+        #	return
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing REGISTER request")
-			self.neh.closeSock()
-			return
+        print("  !!!! PLEASE REGISTER WITH USERNAME='" + str(Config.TEST_USER_NAME) + "' and PASSWORD='" + str(
+            Config.TEST_USER_PASSWORD) + "' WITHIN 5 MINUTES !!!!")
+        self.challenged = 0
+        req = self.readMessageFromNetwork(self.neh, 300, RequestMethod="REGISTER")
 
-		reg = self.readMessageFromNetwork(self.neh, RequestMethod="REGISTER")
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing REGISTER request")
+            self.neh.closeSock()
+            return
 
-		if reg is None:
-			self.addResult(TestCase.TC_ERROR, "missing REGISTER after challenge")
-		else:
-			if reg.hasParsedHeaderField("Authorization"):
-				auth_p = reg.getParsedHeaderValue("Authorization")
-				ret = auth_p.verify(reg.getHeaderValue("Authorization"))
-				if ret:
-					Log.logDebug("case303reg: warnings or errors about the Authorization header, see test results", 1)
-					Log.logTest("case303reg: warnings or erros about the Authorization header, see test results")
-					self.results.extend(ret)
-				if self.first_reg.hasParsedHeaderField("CSeq") and self.reg.hasParsedHeaderField("CSeq"):
-					if (self.reg.getParsedHeaderValue("CSeq").number <= self.first_reg.getParsedHeaderValue("CSeq").number) and (self.reg.getParsedHeaderValue("CallID") == self.first_reg.getParsedHeaderValue("CallID")):
-						self.addResult(TestCase.TC_WARN, "CSeq number was not increased for authorization")
-			else:
-				if reg.hasHeaderField("Authorization"):
-					Log.logDebug("case303reg: failed to parse the given Authorization header", 1)
-					Log.logTest("case303reg: unable to parse the Authorization header")
-					self.addResult(TestCase.TC_ERROR, "failed to parse Authorization header")
-				else:
-					Log.logDebug("case303reg: missing Authorization header in request", 1)
-					Log.logTest("case303reg: missing Authorization header in request")
-					self.addResult(TestCase.TC_FAILED, "missing Authorization header in request")
+        reg = self.readMessageFromNetwork(self.neh, RequestMethod="REGISTER")
 
-			if self.checkAuthResponse(reg):
-				Log.logDebug("case303reg: authenticaton reply is valid", 2)
-				Log.logTest("case303reg: authenticaton reply is valid")
-				self.addResult(TestCase.TC_PASSED, "authentication reply is valid")
-			else:
-				Log.logDebug("case303reg: authentication reply is NOT valid", 1)
-				Log.logTest("case303reg: authentication reply is NOT valid")
-				self.addResult(TestCase.TC_FAILED, "wrong authentication reply")
+        if reg is None:
+            self.addResult(TestCase.TC_ERROR, "missing REGISTER after challenge")
+        else:
+            if reg.hasParsedHeaderField("Authorization"):
+                auth_p = reg.getParsedHeaderValue("Authorization")
+                ret = auth_p.verify(reg.getHeaderValue("Authorization"))
+                if ret:
+                    Log.logDebug("case303reg: warnings or errors about the Authorization header, see test results", 1)
+                    Log.logTest("case303reg: warnings or erros about the Authorization header, see test results")
+                    self.results.extend(ret)
+                if self.first_reg.hasParsedHeaderField("CSeq") and self.reg.hasParsedHeaderField("CSeq"):
+                    if (self.reg.getParsedHeaderValue("CSeq").number <= self.first_reg.getParsedHeaderValue(
+                            "CSeq").number) and (
+                                self.reg.getParsedHeaderValue("CallID") == self.first_reg.getParsedHeaderValue(
+                                    "CallID")):
+                        self.addResult(TestCase.TC_WARN, "CSeq number was not increased for authorization")
+            else:
+                if reg.hasHeaderField("Authorization"):
+                    Log.logDebug("case303reg: failed to parse the given Authorization header", 1)
+                    Log.logTest("case303reg: unable to parse the Authorization header")
+                    self.addResult(TestCase.TC_ERROR, "failed to parse Authorization header")
+                else:
+                    Log.logDebug("case303reg: missing Authorization header in request", 1)
+                    Log.logTest("case303reg: missing Authorization header in request")
+                    self.addResult(TestCase.TC_FAILED, "missing Authorization header in request")
 
-		self.neh.closeSock()
+            if self.checkAuthResponse(reg):
+                Log.logDebug("case303reg: authenticaton reply is valid", 2)
+                Log.logTest("case303reg: authenticaton reply is valid")
+                self.addResult(TestCase.TC_PASSED, "authentication reply is valid")
+            else:
+                Log.logDebug("case303reg: authentication reply is NOT valid", 1)
+                Log.logTest("case303reg: authentication reply is NOT valid")
+                self.addResult(TestCase.TC_FAILED, "wrong authentication reply")
 
-	def onREGISTER(self, message):
-		if self.challenged == 0:
-			self.first_reg = message
-			chal = self.createChallenge(mes=message, qop=True)
-			self.writeMessageToNetwork(self.neh, chal)
-			self.challenged = 1
-		else:
-			self.reg = message
-			repl = self.createReply(200, "OK")
-			self.writeMessageToNetwork(self.neh, repl)
+        self.neh.closeSock()
+
+    def onREGISTER(self, message):
+        if self.challenged == 0:
+            self.first_reg = message
+            chal = self.createChallenge(mes=message, qop=True)
+            self.writeMessageToNetwork(self.neh, chal)
+            self.challenged = 1
+        else:
+            self.reg = message
+            repl = self.createReply(200, "OK")
+            self.writeMessageToNetwork(self.neh, repl)

@@ -28,9 +28,9 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 from Wwwauthenticate import Wwwauthenticate
 
-class Proxyauthenticate (Wwwauthenticate, HeaderFieldHandler):
 
-	# __init__ ,parse and create are inherited from WWWAuthenticate
+class Proxyauthenticate(Wwwauthenticate, HeaderFieldHandler):
+    # __init__ ,parse and create are inherited from WWWAuthenticate
 
-	def verify(self):
-		raise SCNotImplemented("ProxyAuthenticate", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("ProxyAuthenticate", "verify", "not implemented")

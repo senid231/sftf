@@ -30,100 +30,101 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case509 (TestCase):
 
-	def config(self):
-		self.name = "Case 509"
-		self.description = "Proper To-tag use after receipt of multiple 18x"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case509(TestCase):
+    def config(self):
+        self.name = "Case 509"
+        self.description = "Proper To-tag use after receipt of multiple 18x"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.testtag1 = "SC-test-tag-1"
-		self.testtag2 = "SC-test-tag-2"
-		self.testtag3 = "SC-test-tag-3"
-		self.ack = None
+    def run(self):
+        self.testtag1 = "SC-test-tag-1"
+        self.testtag2 = "SC-test-tag-2"
+        self.testtag3 = "SC-test-tag-3"
+        self.ack = None
 
-		self.neh = NEH.NetworkEventHandler(self.transport)
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		#if not self.userInteraction("case509: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+        # if not self.userInteraction("case509: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		self.rejected = 0
-		while self.rejected == 0:
-			print "  !!!! PLEASE CALL ANY NUMBER/USER  !!!!"
-			req = self.readMessageFromNetwork(self.neh)
+        self.rejected = 0
+        while self.rejected == 0:
+            print("  !!!! PLEASE CALL ANY NUMBER/USER  !!!!")
+            req = self.readMessageFromNetwork(self.neh)
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-		if (req is not None) and (self.ack is not None):
-			if self.ack.hasParsedHeaderField("To"):
-				ack_to = self.ack.getParsedHeaderValue("To")
-			else:
-				Log.logDebug("case509: missing To in ACK", 1)
-				Log.logTest("case509: missing To in ACK")
-				self.addResult(TestCase.TC_ERROR, "missing To in ACK")
+        if (req is not None) and (self.ack is not None):
+            if self.ack.hasParsedHeaderField("To"):
+                ack_to = self.ack.getParsedHeaderValue("To")
+            else:
+                Log.logDebug("case509: missing To in ACK", 1)
+                Log.logTest("case509: missing To in ACK")
+                self.addResult(TestCase.TC_ERROR, "missing To in ACK")
 
-			if ack_to.tag == self.testtag2:
-				Log.logDebug("case509: To-tag in ACK matches tag from correct 180", 2)
-				Log.logTest("case509: To-tag in ACK matches tag from correct 180")
-				self.addResult(TestCase.TC_PASSED, "To-tag in ACK matches correct 180 tag")
-			else:
-				Log.logDebug("case509: To-tag in ACK (\'" + str(ack_to.tag) + "\') differes from tag in 603 (\'" + str(self.testtag2) + "\')", 1)
-				Log.logTest("case509: To-tag in ACK differes from tag in 603")
-				if ack_to.tag == self.testtag1:
-					Log.logTest("case509: wrong To-tag from first 180 is used")
-				elif ack_to.tag == self.testtag3:
-					Log.logTest("case509: wrong To-tag from third 180 is used")
-				self.addResult(TestCase.TC_FAILED, "To-tag in ACK differes from tag in 603")
-		elif (self.ack is None):
-			self.addResult(TestCase.TC_ERROR, "missing ACK on 603 to check the correct use of the To-tag")
+            if ack_to.tag == self.testtag2:
+                Log.logDebug("case509: To-tag in ACK matches tag from correct 180", 2)
+                Log.logTest("case509: To-tag in ACK matches tag from correct 180")
+                self.addResult(TestCase.TC_PASSED, "To-tag in ACK matches correct 180 tag")
+            else:
+                Log.logDebug("case509: To-tag in ACK (\'" + str(ack_to.tag) + "\') differes from tag in 603 (\'" + str(
+                    self.testtag2) + "\')", 1)
+                Log.logTest("case509: To-tag in ACK differes from tag in 603")
+                if ack_to.tag == self.testtag1:
+                    Log.logTest("case509: wrong To-tag from first 180 is used")
+                elif ack_to.tag == self.testtag3:
+                    Log.logTest("case509: wrong To-tag from third 180 is used")
+                self.addResult(TestCase.TC_FAILED, "To-tag in ACK differes from tag in 603")
+        elif (self.ack is None):
+            self.addResult(TestCase.TC_ERROR, "missing ACK on 603 to check the correct use of the To-tag")
 
 
-	def onINVITE(self, message):
-		repl180first = self.createReply(180, "Ringing")
-		to = repl180first.getParsedHeaderValue("To")
-		if to is None:
-			Log.logDebug("case509: To header missing in request", 1)
-			Log.logTest("case509: To header missing in request")
-			self.addResult(TestCase.TC_ERROR, "To header missing in request")
-		to.tag = self.testtag1
-		repl180first.setHeaderValue("To", to.create())
-		self.writeMessageToNetwork(self.neh, repl180first)
+    def onINVITE(self, message):
+        repl180first = self.createReply(180, "Ringing")
+        to = repl180first.getParsedHeaderValue("To")
+        if to is None:
+            Log.logDebug("case509: To header missing in request", 1)
+            Log.logTest("case509: To header missing in request")
+            self.addResult(TestCase.TC_ERROR, "To header missing in request")
+        to.tag = self.testtag1
+        repl180first.setHeaderValue("To", to.create())
+        self.writeMessageToNetwork(self.neh, repl180first)
 
-		repl180sec = self.createReply(180, "Ringing")
-		to = repl180sec.getParsedHeaderValue("To")
-		if to is None:
-			Log.logDebug("case509: To header missing in request", 1)
-			Log.logTest("case509: To header missing in request")
-			self.addResult(TestCase.TC_ERROR, "To header missing in request")
-		to.tag = self.testtag2
-		repl180sec.setHeaderValue("To", to.create())
-		self.writeMessageToNetwork(self.neh, repl180sec)
+        repl180sec = self.createReply(180, "Ringing")
+        to = repl180sec.getParsedHeaderValue("To")
+        if to is None:
+            Log.logDebug("case509: To header missing in request", 1)
+            Log.logTest("case509: To header missing in request")
+            self.addResult(TestCase.TC_ERROR, "To header missing in request")
+        to.tag = self.testtag2
+        repl180sec.setHeaderValue("To", to.create())
+        self.writeMessageToNetwork(self.neh, repl180sec)
 
-		repl180trd = self.createReply(180, "Ringing")
-		to = repl180trd.getParsedHeaderValue("To")
-		if to is None:
-			Log.logDebug("case509: To header missing in request", 1)
-			Log.logTest("case509: To header missing in request")
-			self.addResult(TestCase.TC_ERROR, "To header missing in request")
-		to.tag = self.testtag3
-		repl180trd.setHeaderValue("To", to.create())
-		self.writeMessageToNetwork(self.neh, repl180trd)
+        repl180trd = self.createReply(180, "Ringing")
+        to = repl180trd.getParsedHeaderValue("To")
+        if to is None:
+            Log.logDebug("case509: To header missing in request", 1)
+            Log.logTest("case509: To header missing in request")
+            self.addResult(TestCase.TC_ERROR, "To header missing in request")
+        to.tag = self.testtag3
+        repl180trd.setHeaderValue("To", to.create())
+        self.writeMessageToNetwork(self.neh, repl180trd)
 
-		repl603 = self.createReply(603, "Decline")
-		to = repl603.getParsedHeaderValue("To")
-		if to is None:
-			Log.logDebug("case509: To header missing in request", 1)
-			Log.logTest("case509: To header missing in request")
-			self.addResult(TestCase.TC_ERROR, "To header missing in request")
-		to.tag = self.testtag2
-		repl603.setHeaderValue("To", to.create())
-		self.rejected = 1
-		self.writeMessageToNetwork(self.neh, repl603)
-		
-		self.ack = self.readRequestFromNetwork(self.neh)
-		if self.ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK for 603")
+        repl603 = self.createReply(603, "Decline")
+        to = repl603.getParsedHeaderValue("To")
+        if to is None:
+            Log.logDebug("case509: To header missing in request", 1)
+            Log.logTest("case509: To header missing in request")
+            self.addResult(TestCase.TC_ERROR, "To header missing in request")
+        to.tag = self.testtag2
+        repl603.setHeaderValue("To", to.create())
+        self.rejected = 1
+        self.writeMessageToNetwork(self.neh, repl603)
+
+        self.ack = self.readRequestFromNetwork(self.neh)
+        if self.ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK for 603")

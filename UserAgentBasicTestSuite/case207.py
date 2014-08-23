@@ -30,63 +30,63 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case207 (TestCase):
 
-	def config(self):
-		self.name = "Case 207"
-		self.description = "Content length larger than message"
-		self.isClient = True
-		self.transport = "UDP"
+class case207(TestCase):
+    def config(self):
+        self.name = "Case 207"
+        self.description = "Content length larger than message"
+        self.isClient = True
+        self.transport = "UDP"
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		inv = self.createRequest("INVITE")
-		cl = inv.getParsedHeaderValue("Content-Length")
-		cl.length = 9999
-		inv.setHeaderValue("Content-Length", cl.create())
-		self.writeMessageToNetwork(self.neh, inv)
+        inv = self.createRequest("INVITE")
+        cl = inv.getParsedHeaderValue("Content-Length")
+        cl.length = 9999
+        inv.setHeaderValue("Content-Length", cl.create())
+        self.writeMessageToNetwork(self.neh, inv)
 
-		self.code = 0
-		while (self.code <= 200):
-			repl = self.readReplyFromNetwork(self.neh)
-			if (repl is not None) and (repl.code > self.code):
-				self.code = repl.code
-			elif  repl is None:
-				self.code = 999
+        self.code = 0
+        while (self.code <= 200):
+            repl = self.readReplyFromNetwork(self.neh)
+            if (repl is not None) and (repl.code > self.code):
+                self.code = repl.code
+            elif repl is None:
+                self.code = 999
 
-		if repl is None:
-			self.addResult(TestCase.TC_FAILED, "missing reply on request")
+        if repl is None:
+            self.addResult(TestCase.TC_FAILED, "missing reply on request")
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-	def onDefaultCode(self, message):
-		if message.code > self.code:
-			self.code = message.code
-		if message.code >= 200:
-			if message.getParsedHeaderValue("CSeq").method == "INVITE":
-				Log.logDebug("case207: sending ACK for >= 200 reply", 3)
-				ack = self.createRequest("ACK", trans=message.transaction)
-				self.writeMessageToNetwork(self.neh, ack)
-			if message.code == 400:
-				self.addResult(TestCase.TC_PASSED, "INVITE rejected with 400")
-			elif message.code == 200:
-				if message.transaction.canceled:
-					Log.logDebug("case207: received 200 for CANCEL", 3)
-				else:
-					Log.logDebug("case207: sending BYE for accepted INVITE", 3)
-					bye = self.createRequest("BYE", dia=message.transaction.dialog)
-					self.writeMessageToNetwork(self.neh, bye)
-					rep = self.readReplyFromNetwork(self.neh)
-					if rep is None:
-						self.addResult(TestCase.TC_ERROR, "missing response on BYE")
-			elif message.code != 487:
-				self.addResult(TestCase.TC_FAILED, "INVITE rejected, but not with 400")
-		else:
-			self.addResult(TestCase.TC_FAILED, "INVITE accepted, not rejected with 400")
-			can = self.createRequest("CANCEL", trans=message.transaction)
-			message.transaction.canceled = True
-			self.writeMessageToNetwork(self.neh, can)
-			canrepl = self.readReplyFromNetwork(self.neh)
-			if canrepl is None:
-				self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")
+    def onDefaultCode(self, message):
+        if message.code > self.code:
+            self.code = message.code
+        if message.code >= 200:
+            if message.getParsedHeaderValue("CSeq").method == "INVITE":
+                Log.logDebug("case207: sending ACK for >= 200 reply", 3)
+                ack = self.createRequest("ACK", trans=message.transaction)
+                self.writeMessageToNetwork(self.neh, ack)
+            if message.code == 400:
+                self.addResult(TestCase.TC_PASSED, "INVITE rejected with 400")
+            elif message.code == 200:
+                if message.transaction.canceled:
+                    Log.logDebug("case207: received 200 for CANCEL", 3)
+                else:
+                    Log.logDebug("case207: sending BYE for accepted INVITE", 3)
+                    bye = self.createRequest("BYE", dia=message.transaction.dialog)
+                    self.writeMessageToNetwork(self.neh, bye)
+                    rep = self.readReplyFromNetwork(self.neh)
+                    if rep is None:
+                        self.addResult(TestCase.TC_ERROR, "missing response on BYE")
+            elif message.code != 487:
+                self.addResult(TestCase.TC_FAILED, "INVITE rejected, but not with 400")
+        else:
+            self.addResult(TestCase.TC_FAILED, "INVITE accepted, not rejected with 400")
+            can = self.createRequest("CANCEL", trans=message.transaction)
+            message.transaction.canceled = True
+            self.writeMessageToNetwork(self.neh, can)
+            canrepl = self.readReplyFromNetwork(self.neh)
+            if canrepl is None:
+                self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")

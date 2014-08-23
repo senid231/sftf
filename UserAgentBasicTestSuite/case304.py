@@ -29,87 +29,92 @@
 from TestCase import TestCase
 from SCException import SCException
 import NetworkEventHandler as NEH
-import Log, Helper
+import Log
+import Helper
 
-class case304 (TestCase):
 
-	def config(self):
-		self.name = "Case 304"
-		self.description = "Authentication retry timer"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
-		self.register = True
+class case304(TestCase):
+    def config(self):
+        self.name = "Case 304"
+        self.description = "Authentication retry timer"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
+        self.register = True
 
-	def run(self):
-		self.required_min_delay = 3.0
+    def run(self):
+        self.required_min_delay = 3.0
 
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case304: proceed when ready to send REGISTER"):
-		#	neh.closeSock()
-		#	return
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		self.challenged = 0
-		print "  !!!!  PLEASE REGISTER WITHIN 5 MINUTES  !!!!"
-		self.old_req = self.readMessageFromNetwork(self.neh, 300)
+        # if not self.userInteraction("case304: proceed when ready to send REGISTER"):
+        # neh.closeSock()
+        #	return
 
-		if self.old_req is None:
-			self.addResult(TestCase.TC_ERROR, "missing REGISTER request")
-			self.neh.closeSock()
-			return
+        self.challenged = 0
+        print("  !!!!  PLEASE REGISTER WITHIN 5 MINUTES  !!!!")
+        self.old_req = self.readMessageFromNetwork(self.neh, 300)
 
-		self.last_delay = self.smallest_delay = 0
-		for i in range(0, 3):
+        if self.old_req is None:
+            self.addResult(TestCase.TC_ERROR, "missing REGISTER request")
+            self.neh.closeSock()
+            return
 
-			try:
-				self.new_req = self.readMessageFromNetwork(self.neh, 2*self.required_min_delay, False, RequestMethod="REGISTER")
-			except SCException:
-				Log.logDebug("case304: smallest delay between retries was: " + str(self.smallest_delay) + "sec", 2)
-				Log.logTest("case304: smallest delay between retries was: " + str(self.smallest_delay) + "sec")
-				if i == 0:
-					Log.logDebug("case304: timeout after first 401, failed to answer the challenge", 1)
-					Log.logTest("case304: timeout after sending first 401")
-					self.addResult(TestCase.TC_WARN, "timeout after sending first 401")
-				elif i == 1:
-					if self.smallest_delay < self.required_min_delay:
-						Log.logDebug("case304: timeout after sending second 401", 2)
-						Log.logTest("case304: tried authentication only one time")
-						self.addResult(TestCase.TC_PASSED, "tried authentication only one time")
-					else:
-						Log.logDebug("case304: timeout after sending second 401, but delay was big enough to retype password", 2)
-						Log.logTest("case304: tried authentication only one time")
-						self.addResult(TestCase.TC_PASSED, "tried authentication only one time")
-				else:
-					Log.logDebug("case304: timeout after third 401, but tried to authenticate two times", 1)
-					Log.logTest("case304: timeout after sending third 401")
-					self.addResult(TestCase.TC_WARN, "timeout after sending third 401")
-				self.neh.closeSock()
-				return
+        self.last_delay = self.smallest_delay = 0
+        for i in range(0, 3):
 
-		Log.logDebug("case304: retired registration three times with same credentials", 1)
-		Log.logTest("case304: retired registration three times with same credentials")
-		self.addResult(TestCase.TC_FAILED, "retired registration three times with same credentials")
+            try:
+                self.new_req = self.readMessageFromNetwork(self.neh, 2 * self.required_min_delay, False,
+                                                           RequestMethod="REGISTER")
+            except SCException:
+                Log.logDebug("case304: smallest delay between retries was: " + str(self.smallest_delay) + "sec", 2)
+                Log.logTest("case304: smallest delay between retries was: " + str(self.smallest_delay) + "sec")
+                if i == 0:
+                    Log.logDebug("case304: timeout after first 401, failed to answer the challenge", 1)
+                    Log.logTest("case304: timeout after sending first 401")
+                    self.addResult(TestCase.TC_WARN, "timeout after sending first 401")
+                elif i == 1:
+                    if self.smallest_delay < self.required_min_delay:
+                        Log.logDebug("case304: timeout after sending second 401", 2)
+                        Log.logTest("case304: tried authentication only one time")
+                        self.addResult(TestCase.TC_PASSED, "tried authentication only one time")
+                    else:
+                        Log.logDebug(
+                            "case304: timeout after sending second 401, but delay was big enough to retype password", 2)
+                        Log.logTest("case304: tried authentication only one time")
+                        self.addResult(TestCase.TC_PASSED, "tried authentication only one time")
+                else:
+                    Log.logDebug("case304: timeout after third 401, but tried to authenticate two times", 1)
+                    Log.logTest("case304: timeout after sending third 401")
+                    self.addResult(TestCase.TC_WARN, "timeout after sending third 401")
+                self.neh.closeSock()
+                return
 
-		self.neh.closeSock()
+        Log.logDebug("case304: retired registration three times with same credentials", 1)
+        Log.logTest("case304: retired registration three times with same credentials")
+        self.addResult(TestCase.TC_FAILED, "retired registration three times with same credentials")
 
-	def onREGISTER(self, message):
-		if self.challenged == 0:
-			repl401 = self.createChallenge(mes=message)
-			self.challenged = 1
-			self.writeMessageToNetwork(self.neh, repl401)
-		else:
-			# dont count the delay between the first un-authorized request
-			# and the re-send request with authorization
-			self.new_req = message
-			if not ((not self.old_req.hasHeaderField("Authorization")) and self.new_req.hasHeaderField("Authorization")):
-				self.last_delay = Helper.eventTimeDiff(self.new_req.event, self.old_req.event)
-				if self.smallest_delay == 0:
-					self.smallest_delay = self.last_delay
-				if self.last_delay < self.smallest_delay :
-					self.smallest_delay = self.last_delay
+        self.neh.closeSock()
 
-			repl = self.createChallenge(mes=message)
-			self.writeMessageToNetwork(self.neh, repl)
+    def onREGISTER(self, message):
+        if self.challenged == 0:
+            repl401 = self.createChallenge(mes=message)
+            self.challenged = 1
+            self.writeMessageToNetwork(self.neh, repl401)
+        else:
+            # dont count the delay between the first un-authorized request
+            # and the re-send request with authorization
+            self.new_req = message
+            if not (
+                        (not self.old_req.hasHeaderField("Authorization")) and self.new_req.hasHeaderField(
+                            "Authorization")):
+                self.last_delay = Helper.eventTimeDiff(self.new_req.event, self.old_req.event)
+                if self.smallest_delay == 0:
+                    self.smallest_delay = self.last_delay
+                if self.last_delay < self.smallest_delay:
+                    self.smallest_delay = self.last_delay
 
-			self.old_req = self.new_req
+            repl = self.createChallenge(mes=message)
+            self.writeMessageToNetwork(self.neh, repl)
+
+            self.old_req = self.new_req

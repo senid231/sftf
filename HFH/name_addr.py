@@ -25,43 +25,43 @@
 # $Id: name_addr.py,v 1.6 2004/03/30 21:52:36 lando Exp $
 #
 def parse(v):
-		displayname = None
-		uristr = None
-		rem = ""
-		params = []
-		brackets = False
-		if (v is None) or (len(v) == 0):
-			return displayname, uristr, params, brackets
-		lq = v.find("\"")
-		if (lq != -1):
-			rq = v[lq+1:].find("\"")
-		lb = v.find("<")
-		if (lb != -1):
-			rb = v[lb+1:].find(">")
-			brackets = True
-		if (lq > lb):
-			lq = -1
-			rq = -1
-		if (lq != -1 and lb != -1 and lq < lb):
-			displayname = v[lq+1:lq+1+rq]
-			uristr = v[lb+1:lb+1+rb]
-			rem = v[lb+2+rb:]
-		elif (lq == -1 and lb != -1):
-			displayname = v[:lb].rstrip()
-			uristr = v[lb+1:lb+1+rb]
-			rem = v[lb+2+rb:]
-		elif (lq == -1 and lb == -1):
-			# ; would introduce header parameters, but we can not
-			# distinguish between header and URI parameters here, so
-			# we just signal if we found brackets and the caller of
-			# this function needs to take care of the rest
-			uristr = v
-			rem = ""
-		semi = rem.find(";")
-		if (semi != -1):
-			params = rem[semi+1:].split(";")
-		elif len(rem) > 0:
-			params.append(rem)
-		if (displayname is not None and len(displayname) == 0):
-			displayname = None
-		return displayname, uristr, params, brackets
+    displayname = None
+    uristr = None
+    rem = ""
+    params = []
+    brackets = False
+    if (v is None) or (len(v) == 0):
+        return displayname, uristr, params, brackets
+    lq = v.find("\"")
+    if (lq != -1):
+        rq = v[lq + 1:].find("\"")
+    lb = v.find("<")
+    if (lb != -1):
+        rb = v[lb + 1:].find(">")
+        brackets = True
+    if (lq > lb):
+        lq = -1
+        rq = -1
+    if (lq != -1 and lb != -1 and lq < lb):
+        displayname = v[lq + 1:lq + 1 + rq]
+        uristr = v[lb + 1:lb + 1 + rb]
+        rem = v[lb + 2 + rb:]
+    elif (lq == -1 and lb != -1):
+        displayname = v[:lb].rstrip()
+        uristr = v[lb + 1:lb + 1 + rb]
+        rem = v[lb + 2 + rb:]
+    elif (lq == -1 and lb == -1):
+        # ; would introduce header parameters, but we can not
+        # distinguish between header and URI parameters here, so
+        # we just signal if we found brackets and the caller of
+        # this function needs to take care of the rest
+        uristr = v
+        rem = ""
+    semi = rem.find(";")
+    if (semi != -1):
+        params = rem[semi + 1:].split(";")
+    elif len(rem) > 0:
+        params.append(rem)
+    if (displayname is not None and len(displayname) == 0):
+        displayname = None
+    return displayname, uristr, params, brackets

@@ -26,45 +26,47 @@
 #
 from SipMessage import SipMessage
 
-class SipReply (SipMessage):
-	"""This class inherits all code from SipMessage and implements all
-	required functions to handle SIP reply messages.
-	"""
 
-	def __init__(self):
-		SipMessage.__init__(self)
-		self.isRequest = False
-		self.code = None
-		self.reason = None
-		self.request = None
+class SipReply(SipMessage):
+    """This class inherits all code from SipMessage and implements all
+    required functions to handle SIP reply messages.
+    """
 
-	def __str__(self):
-		return '[' + SipMessage.__str__(self) \
-				+ ', code:\'' + str(self.code) + '\', ' \
-				+ 'reason:\'' + str(self.reason) + '\' ' \
-				+ 'request:\'' + str(self.request) + '\']'
+    def __init__(self):
+        SipMessage.__init__(self)
+        self.isRequest = False
+        self.code = None
+        self.reason = None
+        self.request = None
 
-	def parseFirstLine(self, fLine):
-		"""Tries to parse the given first line from the message. Returns
-		True on success and False on error.
-		"""
-		try:
-			if (fLine.lower().startswith("sip")):
-				index = fLine.index('/')
-				self.protocol = fLine[0:index]
-				fLine = fLine[index+1:]
-				index = fLine.index(' ')
-				self.version = fLine[0:index]
-				fLine = fLine[index+1:]
-				self.code = int(fLine[0:3])
-				self.reason = fLine[4:].replace("\n", "").replace("\r", "").rstrip()
-				return True
-			else:
-				return False
-		except:
-			return False
+    def __str__(self):
+        return '[' + SipMessage.__str__(self) \
+               + ', code:\'' + str(self.code) + '\', ' \
+               + 'reason:\'' + str(self.reason) + '\' ' \
+               + 'request:\'' + str(self.request) + '\']'
 
-	def createFirstLine(self):
-		"""Creates and inserts the first line of the reply into the event.
-		"""
-		self.event.headers.insert(0, self.protocol + "/" + str(self.version) + " " + str(self.code) + " " + self.reason + "\r\n")
+    def parseFirstLine(self, fLine):
+        """Tries to parse the given first line from the message. Returns
+        True on success and False on error.
+        """
+        try:
+            if (fLine.lower().startswith("sip")):
+                index = fLine.index('/')
+                self.protocol = fLine[0:index]
+                fLine = fLine[index + 1:]
+                index = fLine.index(' ')
+                self.version = fLine[0:index]
+                fLine = fLine[index + 1:]
+                self.code = int(fLine[0:3])
+                self.reason = fLine[4:].replace("\n", "").replace("\r", "").rstrip()
+                return True
+            else:
+                return False
+        except:
+            return False
+
+    def createFirstLine(self):
+        """Creates and inserts the first line of the reply into the event.
+        """
+        self.event.headers.insert(0, self.protocol + "/" + str(self.version) + " " + str(
+            self.code) + " " + self.reason + "\r\n")

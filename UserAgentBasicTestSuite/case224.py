@@ -28,41 +28,40 @@
 #
 from TestCase import TestCase
 import NetworkEventHandler as NEH
-import Log
 
-class case224 (TestCase):
 
-	def config(self):
-		self.name = "Case 224"
-		self.description = "OPTIONS support"
-		self.isClient = True
-		self.transport = "UDP"
+class case224(TestCase):
+    def config(self):
+        self.name = "Case 224"
+        self.description = "OPTIONS support"
+        self.isClient = True
+        self.transport = "UDP"
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		inv = self.createRequest("OPTIONS")
-		self.writeMessageToNetwork(self.neh, inv)
+        inv = self.createRequest("OPTIONS")
+        self.writeMessageToNetwork(self.neh, inv)
 
-		self.code = 0
-		while (self.code < 200):
-			repl = self.readReplyFromNetwork(self.neh)
-			if (repl is not None) and (repl.code > self.code):
-				self.code = repl.code
-			elif repl is None:
-				self.code = 999
+        self.code = 0
+        while (self.code < 200):
+            repl = self.readReplyFromNetwork(self.neh)
+            if (repl is not None) and (repl.code > self.code):
+                self.code = repl.code
+            elif repl is None:
+                self.code = 999
 
-		if repl is None:
-			self.addResult(TestCase.TC_FAILED, "missing reply on request")
-		self.neh.closeSock()
+        if repl is None:
+            self.addResult(TestCase.TC_FAILED, "missing reply on request")
+        self.neh.closeSock()
 
-	def onDefaultCode(self, message):
-		if message.code > self.code:
-			self.code = message.code
-		if message.code == 200:
-			#FIXME should we also check the content of the 200?
-			self.addResult(TestCase.TC_PASSED, "OPTIONS answered with 200")
-			if (len(message.body) > 0):
-				self.addResult(TestCase.TC_WARN, "no body expected in OPTIONS reply")
-		else:
-			self.addResult(TestCase.TC_FAILED, "OPTIONS request rejected")
+    def onDefaultCode(self, message):
+        if message.code > self.code:
+            self.code = message.code
+        if message.code == 200:
+            # FIXME should we also check the content of the 200?
+            self.addResult(TestCase.TC_PASSED, "OPTIONS answered with 200")
+            if (len(message.body) > 0):
+                self.addResult(TestCase.TC_WARN, "no body expected in OPTIONS reply")
+        else:
+            self.addResult(TestCase.TC_FAILED, "OPTIONS request rejected")

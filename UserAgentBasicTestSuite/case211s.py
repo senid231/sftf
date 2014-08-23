@@ -30,52 +30,51 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case211s (TestCase):
 
-	def config(self):
-		self.name = "Case 211s"
-		self.description = "Missing Required Header Fields"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case211s(TestCase):
+    def config(self):
+        self.name = "Case 211s"
+        self.description = "Missing Required Header Fields"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		#if not self.userInteraction("case211s: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+        # if not self.userInteraction("case211s: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		self.end = 0
-		print "  !!!! PLEASE CALL ANY NUMBER/USER !!!!"
-		while self.end == 0:
-			req = self.readRequestFromNetwork(self.neh, TimeoutError=False)
+        self.end = 0
+        print("  !!!! PLEASE CALL ANY NUMBER/USER !!!!")
+        while self.end == 0:
+            req = self.readRequestFromNetwork(self.neh, TimeoutError=False)
+
+        self.neh.closeSock()
+
+        res = True
+        for hf in ("From", "To", "CSeq", "Call-ID"):
+            if not self.req.hasHeaderField(hf):
+                res = False
+                Log.logDebug("case211s: request misses \'" + hf + "\' header field", 1)
+                Log.logTest("case211s: request misses \'" + hf + "\' header field")
+
+        if res:
+            Log.logDebug("case211s: all mandatory header fields found", 2)
+            Log.logTest("case211s: all mandatory header fields present")
+            self.addResult(TestCase.TC_PASSED, "all mandatory header fields present")
+        else:
+            Log.logDebug("case211s: request misses a mandatory header field", 1)
+            Log.logTest("case211s: request misses a mandatory header field")
+            self.addResult(TestCase.TC_FAILED, "request misses mandatory header field")
 
 
-		self.neh.closeSock()
-
-		res = True
-		for hf in ("From", "To", "CSeq", "Call-ID"):
-			if not self.req.hasHeaderField(hf):
-				res = False
-				Log.logDebug("case211s: request misses \'" + hf + "\' header field", 1)
-				Log.logTest("case211s: request misses \'" + hf + "\' header field")
-
-		if res:
-			Log.logDebug("case211s: all mandatory header fields found", 2)
-			Log.logTest("case211s: all mandatory header fields present")
-			self.addResult(TestCase.TC_PASSED, "all mandatory header fields present")
-		else:
-			Log.logDebug("case211s: request misses a mandatory header field", 1)
-			Log.logTest("case211s: request misses a mandatory header field")
-			self.addResult(TestCase.TC_FAILED, "request misses mandatory header field")
-
-
-	def onINVITE(self, message):
-		self.end = 1
-		self.req = message
-		repl = self.createReply(404, "Not Found")
-		self.writeMessageToNetwork(self.neh, repl)
-		ack = self.readRequestFromNetwork(self.neh)
-		if ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK for 404")
+    def onINVITE(self, message):
+        self.end = 1
+        self.req = message
+        repl = self.createReply(404, "Not Found")
+        self.writeMessageToNetwork(self.neh, repl)
+        ack = self.readRequestFromNetwork(self.neh)
+        if ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK for 404")

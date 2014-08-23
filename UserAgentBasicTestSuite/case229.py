@@ -28,68 +28,67 @@
 #
 from TestCase import TestCase
 import NetworkEventHandler as NEH
-import Log
 
-class case229 (TestCase):
 
-	def config(self):
-		self.name = "Case 229"
-		self.description = "INVITE with missing body"
-		self.isClient = True
-		self.transport = "UDP"
-		self.interactRequired = True
+class case229(TestCase):
+    def config(self):
+        self.name = "Case 229"
+        self.description = "INVITE with missing body"
+        self.isClient = True
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		# creating a network socket is always required
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        # creating a network socket is always required
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		self.inv = self.createRequest("INVITE")
-		self.setBody([], self.inv)
-		self.inv.removeParsedHeaderField("Content-Type")
-		self.inv.removeHeaderField("Content-Type")
-		self.writeMessageToNetwork(self.neh, self.inv)
+        self.inv = self.createRequest("INVITE")
+        self.setBody([], self.inv)
+        self.inv.removeParsedHeaderField("Content-Type")
+        self.inv.removeHeaderField("Content-Type")
+        self.writeMessageToNetwork(self.neh, self.inv)
 
-		self.end = 0
-		self.invited = 0
-		self.ringing = 0
+        self.end = 0
+        self.invited = 0
+        self.ringing = 0
 
-		while self.end == 0:
-			if self.invited == 0:
-				print "  !!!!  PLEASE ANSWER/PICKUP THE CALL  !!!!"
-			repl = self.readReplyFromNetwork(self.neh)
-			if (repl is None) and (self.ringing == 0):
-				self.end = 1
-				self.addResult(TestCase.TC_ERROR, "missing reply")
+        while self.end == 0:
+            if self.invited == 0:
+                print("  !!!!  PLEASE ANSWER/PICKUP THE CALL  !!!!")
+            repl = self.readReplyFromNetwork(self.neh)
+            if (repl is None) and (self.ringing == 0):
+                self.end = 1
+                self.addResult(TestCase.TC_ERROR, "missing reply")
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-	def on180(self, message):
-		self.ringing = 1
+    def on180(self, message):
+        self.ringing = 1
 
-	def on183(self, message):
-		self.on180(message)
+    def on183(self, message):
+        self.on180(message)
 
-	def on200(self, message):
-		if message.getParsedHeaderValue("CSeq").method == "INVITE":
-			self.invited = 1
-			self.ringing = 0
-			#FIXME we should check the content of the body if it
-			# relly contains a SDP offer
-			self.addResult(TestCase.TC_PASSED, "INVITE without body accepted")
-			ack = self.createRequest("ACK", trans=message.transaction)
-			self.mediaSockPair = self.setMediaBody(ack)
-			self.writeMessageToNetwork(self.neh, ack)
-			bye = self.createRequest("BYE", dia=message.transaction.dialog)
-			self.writeMessageToNetwork(self.neh, bye)
-			self.end = 1
-			repl = self.readReplyFromNetwork(self.neh)
-			if repl is None:
-				self.addResult(TestCase.TC_ERROR, "missing reply on BYE")
+    def on200(self, message):
+        if message.getParsedHeaderValue("CSeq").method == "INVITE":
+            self.invited = 1
+            self.ringing = 0
+            # FIXME we should check the content of the body if it
+            # relly contains a SDP offer
+            self.addResult(TestCase.TC_PASSED, "INVITE without body accepted")
+            ack = self.createRequest("ACK", trans=message.transaction)
+            self.mediaSockPair = self.setMediaBody(ack)
+            self.writeMessageToNetwork(self.neh, ack)
+            bye = self.createRequest("BYE", dia=message.transaction.dialog)
+            self.writeMessageToNetwork(self.neh, bye)
+            self.end = 1
+            repl = self.readReplyFromNetwork(self.neh)
+            if repl is None:
+                self.addResult(TestCase.TC_ERROR, "missing reply on BYE")
 
-	def onDefaultCode(self, message):
-		if (message.code >= 300) and (message.getParsedHeaderValue("CSeq").method == "INVITE"):
-			self.addResult(TestCase.TC_FAILED, "INVITE without body rejected with '" + str(message.code) + "'")
-			ack = self.createRequest("ACK", trans=message.transaction)
-			self.mediaSockPair = self.setMediaBody(ack)
-			self.writeMessageToNetwork(self.neh, ack)
-			self.end = 1
+    def onDefaultCode(self, message):
+        if (message.code >= 300) and (message.getParsedHeaderValue("CSeq").method == "INVITE"):
+            self.addResult(TestCase.TC_FAILED, "INVITE without body rejected with '" + str(message.code) + "'")
+            ack = self.createRequest("ACK", trans=message.transaction)
+            self.mediaSockPair = self.setMediaBody(ack)
+            self.writeMessageToNetwork(self.neh, ack)
+            self.end = 1

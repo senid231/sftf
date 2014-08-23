@@ -45,7 +45,7 @@ LOG_DEBUG_FILE = "debug.log"
 LOG_TESTS_FILE = "sftf.log"
 
 # the default file read in by FileEventListener
-DEF_SIP_FILE= "test_in.sip"
+DEF_SIP_FILE = "test_in.sip"
 
 # the maximum packet size read from network
 MAX_PKG_SIZE = 8192

@@ -26,25 +26,24 @@
 #
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
-import Log
+
 
 class Useragent(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.product = None
+        if value is not None:
+            self.parse(value)
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.product = None
-		if value is not None:
-			self.parse(value)
+    def __str__(self):
+        return '[product:\'' + str(self.product) + '\']'
 
-	def __str__(self):
-		return '[product:\'' + str(self.product) + '\']'
+    def parse(self, value):
+        # FIXME should be improved, but is really ugly to parse
+        self.product = value.replace("\r", "").replace("\t", "").strip()
 
-	def parse(self, value):
-		# FIXME should be improved, but is really ugly to parse
-		self.product = value.replace("\r", "").replace("\t", "").strip()
+    def create(self):
+        raise SCNotImplemented("UserAgent", "create", "not implemented")
 
-	def create(self):
-		raise SCNotImplemented("UserAgent", "create", "not implemented")
-
-	def verify(self):
-		raise SCNotImplemented("UserAgent", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("UserAgent", "verify", "not implemented")

@@ -30,74 +30,78 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case202 (TestCase):
 
-	def config(self):
-		self.name = "Case 202"
-		self.description = "Wide range of valid charaters"
-		self.isClient = True
-		self.transport = "UDP"
+class case202(TestCase):
+    def config(self):
+        self.name = "Case 202"
+        self.description = "Wide range of valid charaters"
+        self.isClient = True
+        self.transport = "UDP"
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		inv = self.createRequest("INVITE")
-		inv.rUri.username = "1_unusual.URI~(to-be!sure)&isn't+it$/crazy?,/;;*:&it+has=1,weird!*pass$wo~d_too.(doesn't-it)"
-		via = inv.getParsedHeaderValue("Via")
-		via.branch = "z9hG4bK-.!%66*_+`'~"
-		inv.setHeaderValue("Via", via.create())
-		to = inv.getParsedHeaderValue("To")
-		to.displayname = "BEL:\\\x07 NUL:\\\x00 DEL:\\\x7F"
-		to.uri.username = "1_unusual.URI~(to-be!sure)&isn't+it$/crazy?,/;;*:&it+has=1,weird!*pass$wo~d_too.(doesn't-it)"
-		inv.setHeaderValue("To", to.create())
-		inv.transaction.dialog.remoteUri = to
-		self.writeMessageToNetwork(self.neh, inv)
+        inv = self.createRequest("INVITE")
+        inv.rUri.username = "1_unusual.URI~(to-be!sure)&isn't+it$/crazy?,/;;*:&it+has=1,weird!*pass$wo~d_too.(doesn't-it)"
+        via = inv.getParsedHeaderValue("Via")
+        via.branch = "z9hG4bK-.!%66*_+`'~"
+        inv.setHeaderValue("Via", via.create())
+        to = inv.getParsedHeaderValue("To")
+        to.displayname = "BEL:\\\x07 NUL:\\\x00 DEL:\\\x7F"
+        to.uri.username = "1_unusual.URI~(to-be!sure)&isn't+it$/crazy?,/;;*:&it+has=1,weird!*pass$wo~d_too.(doesn't-it)"
+        inv.setHeaderValue("To", to.create())
+        inv.transaction.dialog.remoteUri = to
+        self.writeMessageToNetwork(self.neh, inv)
 
-		self.code = 0
-		while (self.code <= 200):
-			repl = self.readReplyFromNetwork(self.neh)
-			if (repl is not None) and (repl.code > self.code):
-				self.code = repl.code
-			elif  repl is None:
-				self.code = 999
+        self.code = 0
+        while (self.code <= 200):
+            repl = self.readReplyFromNetwork(self.neh)
+            if (repl is not None) and (repl.code > self.code):
+                self.code = repl.code
+            elif repl is None:
+                self.code = 999
 
-		if repl is None:
-			self.addResult(TestCase.TC_FAILED, "missing reply on request")
+        if repl is None:
+            self.addResult(TestCase.TC_FAILED, "missing reply on request")
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-	def onDefaultCode(self, message):
-		if message.code > self.code:
-			self.code = message.code
-		if message.code >= 200:
-			if (message.hasParsedHeaderField("CSeq") and (message.getParsedHeaderValue("CSeq").method == "INVITE")):
-				Log.logDebug("case202: sending ACK for >= 200 reply", 3)
-				ack = self.createRequest("ACK", trans=message.transaction)
-				self.writeMessageToNetwork(self.neh, ack)
-				if message.code != 487:
-					self.addResult(TestCase.TC_WARN, "INVITE with wide range of characters rejected with '" + str(message.code) + "'")
-				elif message.code == 200:
-					if len(self.results):
-						self.addResult(TestCase.TC_PASSED, "INVITE with wide range of characters accepted")
-					Log.logDebug("case202: sending BYE for accepted INVITE", 3)
-					bye = self.createRequest("BYE", dia=message.transaction.dialog)
-					self.writeMessageToNetwork(self.neh, bye)
-					rep = self.readReplyFromNetwork(self.neh)
-					if rep is None:
-						self.addResult(TestCase.TC_ERROR, "missing response on BYE")
-			elif (message.hasParsedHeaderField("CSeq")) and (message.getParsedHeaderValue("CSeq").method == "CANCEL") and (message.code != 200):
-				self.addResult(TestCase.TC_WARN, "received \'" + str(message.code) + "\' for CANCEL")
-			elif (not message.transaction.canceled) and (message.hasParsedHeaderField("CSeq")) and (message.getParsedHeaderValue("CSeq").method == "INVITE"):
-				Log.logDebug("case202: sending ACK for >= 200 reply", 3)
-				ack = self.createRequest("ACK", trans=message.transaction)
-				self.writeMessageToNetwork(self.neh, ack)
-				if message.code != 487:
-					self.addResult(TestCase.TC_WARN, "INVITE with wide range of characters rejected with '" + str(message.code) + "'")
-		else:
-			self.addResult(TestCase.TC_PASSED, "INVITE with wide range of characters accepted")
-			can = self.createRequest("CANCEL", trans=message.transaction)
-			message.transaction.canceled = True
-			self.writeMessageToNetwork(self.neh, can)
-			canrepl = self.readReplyFromNetwork(self.neh)
-			if canrepl is None:
-				self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")
+    def onDefaultCode(self, message):
+        if message.code > self.code:
+            self.code = message.code
+        if message.code >= 200:
+            if (message.hasParsedHeaderField("CSeq") and (message.getParsedHeaderValue("CSeq").method == "INVITE")):
+                Log.logDebug("case202: sending ACK for >= 200 reply", 3)
+                ack = self.createRequest("ACK", trans=message.transaction)
+                self.writeMessageToNetwork(self.neh, ack)
+                if message.code != 487:
+                    self.addResult(TestCase.TC_WARN,
+                                   "INVITE with wide range of characters rejected with '" + str(message.code) + "'")
+                elif message.code == 200:
+                    if len(self.results):
+                        self.addResult(TestCase.TC_PASSED, "INVITE with wide range of characters accepted")
+                    Log.logDebug("case202: sending BYE for accepted INVITE", 3)
+                    bye = self.createRequest("BYE", dia=message.transaction.dialog)
+                    self.writeMessageToNetwork(self.neh, bye)
+                    rep = self.readReplyFromNetwork(self.neh)
+                    if rep is None:
+                        self.addResult(TestCase.TC_ERROR, "missing response on BYE")
+            elif (message.hasParsedHeaderField("CSeq")) and (
+                        message.getParsedHeaderValue("CSeq").method == "CANCEL") and (message.code != 200):
+                self.addResult(TestCase.TC_WARN, "received \'" + str(message.code) + "\' for CANCEL")
+            elif (not message.transaction.canceled) and (message.hasParsedHeaderField("CSeq")) and (
+                        message.getParsedHeaderValue("CSeq").method == "INVITE"):
+                Log.logDebug("case202: sending ACK for >= 200 reply", 3)
+                ack = self.createRequest("ACK", trans=message.transaction)
+                self.writeMessageToNetwork(self.neh, ack)
+                if message.code != 487:
+                    self.addResult(TestCase.TC_WARN,
+                                   "INVITE with wide range of characters rejected with '" + str(message.code) + "'")
+        else:
+            self.addResult(TestCase.TC_PASSED, "INVITE with wide range of characters accepted")
+            can = self.createRequest("CANCEL", trans=message.transaction)
+            message.transaction.canceled = True
+            self.writeMessageToNetwork(self.neh, can)
+            canrepl = self.readReplyFromNetwork(self.neh)
+            if canrepl is None:
+                self.addResult(TestCase.TC_ERROR, "missing 200 on CANCEL")

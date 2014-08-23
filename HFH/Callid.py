@@ -27,44 +27,44 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
-class Callid (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.str = None
-		self.host = None
-		if value is not None:
-			self.parse(value)
+class Callid(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.str = None
+        self.host = None
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[str:\'' + str(self.str) + '\', ' \
-				+ 'host:\'' + str(self.host) + '\']'
+    def __str__(self):
+        return '[str:\'' + str(self.str) + '\', ' \
+               + 'host:\'' + str(self.host) + '\']'
 
-	def __cmp__(self, other):
-		ret = 0
-		if other is None:
-			return -1
-		if self.str != other.str:
-			ret = ret + 1
-		if self.host != other.host:
-			ret = ret + 1
-		return ret
+    def __cmp__(self, other):
+        ret = 0
+        if other is None:
+            return -1
+        if self.str != other.str:
+            ret = ret + 1
+        if self.host != other.host:
+            ret = ret + 1
+        return ret
 
-	def parse(self, value):
-		v = value.replace("\t","").replace("\r", "").strip()
-		sep = v.find("@")
-		if (sep != -1):
-			self.str = v[:sep]
-			self.host = v[sep+1:]
-		else:
-			self.str = v
+    def parse(self, value):
+        v = value.replace("\t", "").replace("\r", "").strip()
+        sep = v.find("@")
+        if (sep != -1):
+            self.str = v[:sep]
+            self.host = v[sep + 1:]
+        else:
+            self.str = v
 
-	def create(self):
-		if self.host is not None:
-			return str(self.str) + "@" + str(self.host) + "\r\n"
-		else:
-			return str(self.str) + "\r\n"
+    def create(self):
+        if self.host is not None:
+            return str(self.str) + "@" + str(self.host) + "\r\n"
+        else:
+            return str(self.str) + "\r\n"
 
 
-	def verify(self):
-		raise SCNotImplemented("CallID", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("CallID", "verify", "not implemented")

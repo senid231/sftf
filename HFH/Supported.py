@@ -27,25 +27,25 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
+
 class Supported(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.tags = []
+        if value is not None:
+            self.parse(value)
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.tags = []
-		if value is not None:
-			self.parse(value)
+    def __str__(self):
+        return '[tags:\'' + str(self.tags) + '\']'
 
-	def __str__(self):
-		return '[tags:\'' + str(self.tags) + '\']'
+    def parse(self, value):
+        self.tags = list(map(str.strip, value.replace("\r", "").replace("\t", "").split(",")))
 
-	def parse(self, value):
-		self.tags = map(str.strip, value.replace("\r", "").replace("\t", "").split(","))
+    def create(self):
+        ret = ""
+        for i in self.tags:
+            ret = ret + ", " + i
+        return ret[2:] + "\r\n"
 
-	def create(self):
-		ret = ""
-		for i in self.tags:
-			ret = ret + ", " + i
-		return ret[2:] + "\r\n"
-
-	def verify(self):
-		raise SCNotImplemented("Supported", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Supported", "verify", "not implemented")

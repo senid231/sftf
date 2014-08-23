@@ -24,53 +24,61 @@
 #
 # $Id: Log.py,v 1.5 2004/03/19 18:37:25 lando Exp $
 #
-import Config, time
+import time
+
+import Config
 
 SC_LOG_DEBUG = 0
 SC_LOG_TESTS = 1
 
+
 def init():
-	global debugLogFile
-	global testsLogFile
-	if Config.LOG_DEBUG_FILE != "":
-		debugLogFile = file (Config.LOG_DEBUG_FILE, "a")
-	if Config.LOG_TESTS_FILE != "":
-		testsLogFile = file (Config.LOG_TESTS_FILE, "a")
+    global debugLogFile
+    global testsLogFile
+    if Config.LOG_DEBUG_FILE != "":
+        debugLogFile = file(Config.LOG_DEBUG_FILE, "a")
+    if Config.LOG_TESTS_FILE != "":
+        testsLogFile = file(Config.LOG_TESTS_FILE, "a")
+
 
 def log(message, level, dest, stdout):
-	"""Writes the given message to the given file and standard output if
-	the given level is above the configured log level.
-	"""
-	if dest == SC_LOG_DEBUG:
-		if level <= Config.LOG_LEVEL:
-			if stdout:
-				print time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message
-			debugLogFile.write(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message + "\n")
-	elif dest == SC_LOG_TESTS:
-		if stdout:
-			print time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message
-		testsLogFile.write(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message + "\n")
-	else:
-		print "unknown logging destination!"
+    """Writes the given message to the given file and standard output if
+    the given level is above the configured log level.
+    """
+    if dest == SC_LOG_DEBUG:
+        if level <= Config.LOG_LEVEL:
+            if stdout:
+                print(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message)
+            debugLogFile.write(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message + "\n")
+    elif dest == SC_LOG_TESTS:
+        if stdout:
+            print(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message)
+        testsLogFile.write(time.strftime("%b %d %H:%M:%S", time.localtime()) + ": " + message + "\n")
+    else:
+        print("unknown logging destination!")
+
 
 def logTest(message):
-	"""Writes the message to the test result file and standard out with
-	log level 0.
-	"""
-	log(message, 0, SC_LOG_TESTS, Config.LOG_TESTS_STD_OUT)
+    """Writes the message to the test result file and standard out with
+    log level 0.
+    """
+    log(message, 0, SC_LOG_TESTS, Config.LOG_TESTS_STD_OUT)
+
 
 def testLog(message):
-	"""See logTest.
-	"""
-	logTest(message)
+    """See logTest.
+    """
+    logTest(message)
+
 
 def logDebug(message, level):
-	"""Writes the message to the debug log file and standard output if the
-	given log level value is above the configured level.
-	"""
-	log(message, level, SC_LOG_DEBUG, Config.LOG_DEBUG_STD_OUT)
+    """Writes the message to the debug log file and standard output if the
+    given log level value is above the configured level.
+    """
+    log(message, level, SC_LOG_DEBUG, Config.LOG_DEBUG_STD_OUT)
+
 
 def debugLog(message, level):
-	"""See logDebug.
-	"""
-	logDebug(message, level)
+    """See logDebug.
+    """
+    logDebug(message, level)

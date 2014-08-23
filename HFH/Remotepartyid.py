@@ -25,62 +25,63 @@
 # $Id: Contact.py,v 1.15 2004/03/19 18:38:44 lando Exp $
 #
 from HeaderFieldHandler import HeaderFieldHandler
-import name_addr, sip_uri
+import name_addr
+import sip_uri
 from SCException import SCNotImplemented
 
-class Remotepartyid (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.displayname = None
-		self.uri = sip_uri.sip_uri()
-		self.params = []
-		self.next = None
-		if value is not None:
-			self.parse(value)
+class Remotepartyid(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.displayname = None
+        self.uri = sip_uri.sip_uri()
+        self.params = []
+        self.next = None
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[' \
-				+ 'displayname:\'' + str(self.displayname) + '\', ' \
-				+ 'uri:\'' + str(self.uri) + '\', ' \
-				+ 'params:\'' + str(self.params) + '\', ' \
-				+ 'next:\'' + str(self.next) + '\']'
+    def __str__(self):
+        return '[' \
+               + 'displayname:\'' + str(self.displayname) + '\', ' \
+               + 'uri:\'' + str(self.uri) + '\', ' \
+               + 'params:\'' + str(self.params) + '\', ' \
+               + 'next:\'' + str(self.__next__) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\r", "").replace("\t", "").strip()
-		self.displayname, uristr, self.params, brackets = name_addr.parse(v)
-		self.uri.parse(uristr)
-		if (not brackets) and (len(self.uri.params) > 0) and (len(self.uri.headers) == 0) and (len(self.params) == 0):
-			self.params = self.uri.params
-			self.uri.params = []
-		prmlen = range(0, len(self.params))
-		if len(self.params):
-			prmlen.reverse()
-			for i in prmlen:
-				if self.params[i].startswith(","):
-					self.next = Remotepartyid(self.params[i][1:])
-					self.params[i:i+1] = []
+    def parse(self, value):
+        v = value.replace("\r", "").replace("\t", "").strip()
+        self.displayname, uristr, self.params, brackets = name_addr.parse(v)
+        self.uri.parse(uristr)
+        if (not brackets) and (len(self.uri.params) > 0) and (len(self.uri.headers) == 0) and (len(self.params) == 0):
+            self.params = self.uri.params
+            self.uri.params = []
+        prmlen = list(range(0, len(self.params)))
+        if len(self.params):
+            prmlen.reverse()
+            for i in prmlen:
+                if self.params[i].startswith(","):
+                    self.next = Remotepartyid(self.params[i][1:])
+                    self.params[i:i + 1] = []
 
-	def sub_create(self):
-		ret = ""
-		if self.displayname is not None:
-			ret = "\"" + str(self.displayname) + "\" "
-		if self.uri is not None:
-			ret = ret + "<" + self.uri.create() + ">"
-		p = ""
-		for i in self.params:
-			p = p + ';' +i
-		if len(p) > 0:
-			ret = ret + p
-		return ret
+    def sub_create(self):
+        ret = ""
+        if self.displayname is not None:
+            ret = "\"" + str(self.displayname) + "\" "
+        if self.uri is not None:
+            ret = ret + "<" + self.uri.create() + ">"
+        p = ""
+        for i in self.params:
+            p = p + ';' + i
+        if len(p) > 0:
+            ret = ret + p
+        return ret
 
-	def create(self):
-		ret = self.sub_create()
-		cur = self.next
-		while cur is not None:
-			ret = ret + ", " + cur.sub_create()
-			cur = cur.next
-		return ret + '\r\n'
+    def create(self):
+        ret = self.sub_create()
+        cur = self.__next__
+        while cur is not None:
+            ret = ret + ", " + cur.sub_create()
+            cur = cur.__next__
+        return ret + '\r\n'
 
-	def verify(self):
-		raise SCNotImplemented("RemotePartyID", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("RemotePartyID", "verify", "not implemented")

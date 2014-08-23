@@ -28,12 +28,12 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 from Useragent import Useragent
 
+
 class Server(Useragent, HeaderFieldHandler):
+    # __init__() and parse() are inherited from UserAgent
 
-	# __init__() and parse() are inherited from UserAgent
+    def create(self):
+        raise SCNotImplemented("Server", "create", "not implemented")
 
-	def create(self):
-		raise SCNotImplemented("Server", "create", "not implemented")
-
-	def verify(self):
-		raise SCNotImplemented("Server", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Server", "verify", "not implemented")

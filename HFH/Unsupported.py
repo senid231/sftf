@@ -28,9 +28,9 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 import Supported
 
-class Unsupported (Supported.Supported, HeaderFieldHandler):
 
-	# __init__ , parse and create are inherited from Supported
+class Unsupported(Supported.Supported, HeaderFieldHandler):
+    # __init__ , parse and create are inherited from Supported
 
-	def verify(self):
-		raise SCNotImplemented("Unsupported", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Unsupported", "verify", "not implemented")

@@ -27,23 +27,23 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
-class Contentlength (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.length = None
-		if value is not None:
-			self.parse(value)
+class Contentlength(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.length = None
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[length:\'' + str(self.length) + '\']'
+    def __str__(self):
+        return '[length:\'' + str(self.length) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\t", "").replace("\r", "").strip()
-		self.length = int(v)
+    def parse(self, value):
+        v = value.replace("\t", "").replace("\r", "").strip()
+        self.length = int(v)
 
-	def create(self):
-		return str(self.length) + "\r\n"
+    def create(self):
+        return str(self.length) + "\r\n"
 
-	def verify(self):
-		raise SCNotImplemented("ContentLength", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("ContentLength", "verify", "not implemented")

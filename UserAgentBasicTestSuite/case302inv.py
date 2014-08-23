@@ -30,80 +30,83 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case302inv (TestCase):
 
-	def config(self):
-		self.name = "Case 302inv"
-		self.description = "Digest Authentication of INVITE without qop"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case302inv(TestCase):
+    def config(self):
+        self.name = "Case 302inv"
+        self.description = "Digest Authentication of INVITE without qop"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case302inv: proceed when ready to send a INVITE"):
-		#	neh.closeSock()
-		#	return
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		print "  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!"
-		self.challenged = 0
-		req = self.readRequestFromNetwork(self.neh, 60)
+        # if not self.userInteraction("case302inv: proceed when ready to send a INVITE"):
+        # neh.closeSock()
+        #	return
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE request")
-			self.neh.closeSock()
-			return
+        print("  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!")
+        self.challenged = 0
+        req = self.readRequestFromNetwork(self.neh, 60)
 
-		req = self.readRequestFromNetwork(self.neh)
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE request")
+            self.neh.closeSock()
+            return
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE after sending 401 on first")
-		else:
-			if req.hasParsedHeaderField("Authorization"):
-				auth_p = req.getParsedHeaderValue("Authorization")
-				ret = auth_p.verify(req.getHeaderValue("Authorization"))
-				if ret:
-					Log.logDebug("case302inv: warnings or errors about the Authorization header, see test log", 1)
-					Log.logTest("case302inv: warnings or errors about the Authorization header, see WARNINGS above")
-					self.results.extend(ret)
-				if self.first_inv.hasParsedHeaderField("CSeq") and self.inv.hasParsedHeaderField("CSeq"):
-					if (self.inv.getParsedHeaderValue("CSeq").number <= self.first_inv.getParsedHeaderValue("CSeq").number) and (self.inv.getParsedHeaderValue("CallID") == self.first_inv.getParsedHeaderValue("CallID")):
-						self.addResult(TestCase.TC_WARN, "CSeq number was not increased for authorization")
-			else:
-				if req.hasHeaderField("Authorization"):
-					Log.logDebug("case302inv: failed to parse the given Authorization header", 1)
-					Log.logTest("case302inv: unable to parse the Authorization header")
-					self.addResult(TestCase.TC_ERROR, "failed to parse Authorization header")
-				else:
-					Log.logDebug("case302inv: missing Authorization header in request", 1)
-					Log.logTest("case302inv: missing Authorization header in request")
-					self.addResult(TestCase.TC_FAILED, "missing Authorization header in request")
-	
-			if self.checkAuthResponse(req):
-				Log.logDebug("case302inv: authenticaton reply is valid", 2)
-				Log.logTest("case302inv: authenticaton reply is valid")
-				self.addResult(TestCase.TC_PASSED, "authentication reply is valid")
-			else:
-				Log.logDebug("case302inv: authentication reply is NOT valid", 1)
-				Log.logTest("case302inv: authentication reply is NOT valid")
-				self.addResult(TestCase.TC_FAILED, "wrong authentication reply")
+        req = self.readRequestFromNetwork(self.neh)
 
-		self.neh.closeSock()
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE after sending 401 on first")
+        else:
+            if req.hasParsedHeaderField("Authorization"):
+                auth_p = req.getParsedHeaderValue("Authorization")
+                ret = auth_p.verify(req.getHeaderValue("Authorization"))
+                if ret:
+                    Log.logDebug("case302inv: warnings or errors about the Authorization header, see test log", 1)
+                    Log.logTest("case302inv: warnings or errors about the Authorization header, see WARNINGS above")
+                    self.results.extend(ret)
+                if self.first_inv.hasParsedHeaderField("CSeq") and self.inv.hasParsedHeaderField("CSeq"):
+                    if (self.inv.getParsedHeaderValue("CSeq").number <= self.first_inv.getParsedHeaderValue(
+                            "CSeq").number) and (
+                                self.inv.getParsedHeaderValue("CallID") == self.first_inv.getParsedHeaderValue(
+                                    "CallID")):
+                        self.addResult(TestCase.TC_WARN, "CSeq number was not increased for authorization")
+            else:
+                if req.hasHeaderField("Authorization"):
+                    Log.logDebug("case302inv: failed to parse the given Authorization header", 1)
+                    Log.logTest("case302inv: unable to parse the Authorization header")
+                    self.addResult(TestCase.TC_ERROR, "failed to parse Authorization header")
+                else:
+                    Log.logDebug("case302inv: missing Authorization header in request", 1)
+                    Log.logTest("case302inv: missing Authorization header in request")
+                    self.addResult(TestCase.TC_FAILED, "missing Authorization header in request")
 
-	def onINVITE(self, message):
-		if self.challenged == 0:
-			self.first_inv = message
-			repl = self.createChallenge(mes=message)
-			self.writeMessageToNetwork(self.neh, repl)
-			self.challenged = 1
-			ack = self.readRequestFromNetwork(self.neh)
-			if ack is None:
-				self.addResult(TestCase.TC_ERROR, "missing ACK on 401")
-		else:
-			self.inv = message
-			repl = self.createReply(404, "Not Found")
-			self.writeMessageToNetwork(self.neh, repl)
-			ack = self.readRequestFromNetwork(self.neh)
-			if ack is None:
-				self.addResult(TestCase.TC_ERROR, "missing ACK on 404")
+            if self.checkAuthResponse(req):
+                Log.logDebug("case302inv: authenticaton reply is valid", 2)
+                Log.logTest("case302inv: authenticaton reply is valid")
+                self.addResult(TestCase.TC_PASSED, "authentication reply is valid")
+            else:
+                Log.logDebug("case302inv: authentication reply is NOT valid", 1)
+                Log.logTest("case302inv: authentication reply is NOT valid")
+                self.addResult(TestCase.TC_FAILED, "wrong authentication reply")
+
+        self.neh.closeSock()
+
+    def onINVITE(self, message):
+        if self.challenged == 0:
+            self.first_inv = message
+            repl = self.createChallenge(mes=message)
+            self.writeMessageToNetwork(self.neh, repl)
+            self.challenged = 1
+            ack = self.readRequestFromNetwork(self.neh)
+            if ack is None:
+                self.addResult(TestCase.TC_ERROR, "missing ACK on 401")
+        else:
+            self.inv = message
+            repl = self.createReply(404, "Not Found")
+            self.writeMessageToNetwork(self.neh, repl)
+            ack = self.readRequestFromNetwork(self.neh)
+            if ack is None:
+                self.addResult(TestCase.TC_ERROR, "missing ACK on 404")

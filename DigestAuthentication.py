@@ -26,30 +26,33 @@
 #
 import md5
 
+
 def HA1(username, realm, password):
-	"""Calculates the hash of the A1 string (HA1) which consists of
-	the username, the realm and password as parameters.
-	"""
-	a1 = username + ':' + realm + ':' + password
-	m = md5.md5(a1)
-	return m.hexdigest()
+    """Calculates the hash of the A1 string (HA1) which consists of
+    the username, the realm and password as parameters.
+    """
+    a1 = username + ':' + realm + ':' + password
+    m = md5.md5(a1)
+    return m.hexdigest()
+
 
 def HA2(method, uri):
-	"""Caculates the hast of the A2 string (HA2) which requires the
-	request method and the uri.
-	"""
-	a2 = method + ':' + uri
-	m = md5.md5(a2)
-	return m.hexdigest()
+    """Caculates the hast of the A2 string (HA2) which requires the
+    request method and the uri.
+    """
+    a2 = method + ':' + uri
+    m = md5.md5(a2)
+    return m.hexdigest()
+
 
 def response(ha1, nonce, ha2, nc=None, cnonce=None, qop=None):
-	"""Calculates the complete digest authentication response hash value out
-	of the given HA1, nonce value and the HA2. If nonce count, client nonce
-	and qop are given, the response qith qop will be returned.
-	"""
-	if (nc is not None and cnonce is not None and qop is not None):
-		resp = ha1 + ':' + nonce + ':' + str(nc) + ':' + cnonce + ':' + qop + ':' + ha2
-	else:
-		resp = ha1 + ':' + nonce + ':' + ha2
-	m = md5.md5(resp)
-	return m.hexdigest()
+    """Calculates the complete digest authentication response hash value out
+    of the given HA1, nonce value and the HA2. If nonce count, client nonce
+    and qop are given, the response qith qop will be returned.
+    """
+    if (nc is not None and cnonce is not None and qop is not None):
+        resp = ha1 + ':' + nonce + ':' + str(nc) + ':' + cnonce + ':' + qop + ':' + ha2
+    else:
+        resp = ha1 + ':' + nonce + ':' + ha2
+    m = md5.md5(resp)
+    return m.hexdigest()

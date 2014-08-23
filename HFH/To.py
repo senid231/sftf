@@ -26,53 +26,54 @@
 #
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
-import name_addr, sip_uri
+import name_addr
+import sip_uri
 
-class To (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.displayname = None
-		self.uri = sip_uri.sip_uri()
-		self.tag = None
-		self.params = []
-		if value is not None:
-			self.parse(value)
+class To(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.displayname = None
+        self.uri = sip_uri.sip_uri()
+        self.tag = None
+        self.params = []
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[displayname:\'' + str(self.displayname) + '\', ' \
-				+ 'uri:\'' + str(self.uri) + '\', ' \
-				+ 'tag:\'' + str(self.tag) + '\', ' \
-				+ 'params:\'' + str(self.params) + '\']'
+    def __str__(self):
+        return '[displayname:\'' + str(self.displayname) + '\', ' \
+               + 'uri:\'' + str(self.uri) + '\', ' \
+               + 'tag:\'' + str(self.tag) + '\', ' \
+               + 'params:\'' + str(self.params) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\r", "").replace("\t", "").strip()
-		self.displayname, uristr, self.params, brackets = name_addr.parse(v)
-		self.uri.parse(uristr)
-		if (not brackets) and (len(self.uri.params) > 0) and (len(self.uri.headers) == 0) and (len(self.params) == 0):
-			self.params = self.uri.params
-			self.uri.params = []
-		paramslen = range(0, len(self.params))
-		paramslen.reverse()
-		for i in paramslen:
-			if (self.params[i].lower().startswith("tag=")):
-				self.tag = self.params[i][4:]
-				self.params[i:i+1] = []
+    def parse(self, value):
+        v = value.replace("\r", "").replace("\t", "").strip()
+        self.displayname, uristr, self.params, brackets = name_addr.parse(v)
+        self.uri.parse(uristr)
+        if (not brackets) and (len(self.uri.params) > 0) and (len(self.uri.headers) == 0) and (len(self.params) == 0):
+            self.params = self.uri.params
+            self.uri.params = []
+        paramslen = list(range(0, len(self.params)))
+        paramslen.reverse()
+        for i in paramslen:
+            if (self.params[i].lower().startswith("tag=")):
+                self.tag = self.params[i][4:]
+                self.params[i:i + 1] = []
 
-	def create(self):
-		ret = ""
-		if self.displayname is not None:
-			ret = "\"" + str(self.displayname) + "\" "
-		if self.uri is not None:
-			ret = ret + "<" + self.uri.create() + ">"
-		if self.tag is not None:
-			ret = ret + ";tag=" + str(self.tag)
-		p = ""
-		for i in self.params:
-			p = p + ";" + i
-		if len(p) > 0:
-			ret = ret + p
-		return ret + "\r\n"
+    def create(self):
+        ret = ""
+        if self.displayname is not None:
+            ret = "\"" + str(self.displayname) + "\" "
+        if self.uri is not None:
+            ret = ret + "<" + self.uri.create() + ">"
+        if self.tag is not None:
+            ret = ret + ";tag=" + str(self.tag)
+        p = ""
+        for i in self.params:
+            p = p + ";" + i
+        if len(p) > 0:
+            ret = ret + p
+        return ret + "\r\n"
 
-	def verify(self):
-		raise SCNotImplemented("To", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("To", "verify", "not implemented")

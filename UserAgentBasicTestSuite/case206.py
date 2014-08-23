@@ -30,38 +30,38 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case206 (TestCase):
 
-	def config(self):
-		self.name = "Case 206"
-		self.description = "Unusual reason phrase"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case206(TestCase):
+    def config(self):
+        self.name = "Case 206"
+        self.description = "Unusual reason phrase"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		#if not self.userInteraction("case206: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+        # if not self.userInteraction("case206: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		self.challenged = 0
-		print "  !!!! PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUITE  !!!!"
-		req = self.readMessageFromNetwork(self.neh, 60)
+        self.challenged = 0
+        print("  !!!! PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUITE  !!!!")
+        req = self.readMessageFromNetwork(self.neh, 60)
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE request")
-		else:
-			if self.dialog[0].transaction[0].lastACK is not None:
-				self.addResult(TestCase.TC_PASSED, "received ACK for 404 without reason phrase")
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE request")
+        else:
+            if self.dialog[0].transaction[0].lastACK is not None:
+                self.addResult(TestCase.TC_PASSED, "received ACK for 404 without reason phrase")
 
-		self.neh.closeSock()
+        self.neh.closeSock()
 
-	def onINVITE(self, message):
-		Log.logTest("sending 404 without reason for the received INVITE")
-		repl = self.createReply(404, "")
-		self.writeMessageToNetwork(self.neh, repl)
-		ack = self.readMessageFromNetwork(self.neh)
-		if ack is None:
-			self.addResult(TestCase.TC_FAILED, "missing ACK on 404 without reason")
+    def onINVITE(self, message):
+        Log.logTest("sending 404 without reason for the received INVITE")
+        repl = self.createReply(404, "")
+        self.writeMessageToNetwork(self.neh, repl)
+        ack = self.readMessageFromNetwork(self.neh)
+        if ack is None:
+            self.addResult(TestCase.TC_FAILED, "missing ACK on 404 without reason")

@@ -27,23 +27,23 @@
 from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 
-class Maxforwards (HeaderFieldHandler):
 
-	def __init__(self, value=None):
-		HeaderFieldHandler.__init__(self)
-		self.forwards = None
-		if value is not None:
-			self.parse(value)
+class Maxforwards(HeaderFieldHandler):
+    def __init__(self, value=None):
+        HeaderFieldHandler.__init__(self)
+        self.forwards = None
+        if value is not None:
+            self.parse(value)
 
-	def __str__(self):
-		return '[forwards:\'' + str(self.forwards) + '\']'
+    def __str__(self):
+        return '[forwards:\'' + str(self.forwards) + '\']'
 
-	def parse(self, value):
-		v = value.replace("\t", "").replace("\r", "").strip()
-		self.fowards = int(v)
+    def parse(self, value):
+        v = value.replace("\t", "").replace("\r", "").strip()
+        self.fowards = int(v)
 
-	def create(self):
-		return str(self.forwards) + "\r\n"
+    def create(self):
+        return str(self.forwards) + "\r\n"
 
-	def verify(self):
-		raise SCNotImplemented("MaxForwards", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("MaxForwards", "verify", "not implemented")

@@ -28,12 +28,12 @@ from HeaderFieldHandler import HeaderFieldHandler
 from SCException import SCNotImplemented
 from Recordroute import Recordroute
 
-class Route (Recordroute, HeaderFieldHandler):
 
-	# __init__ and parse are inherited from RecordRoute
+class Route(Recordroute, HeaderFieldHandler):
+    # __init__ and parse are inherited from RecordRoute
 
-	def create(self):
-		raise SCNotImplemented("Route", "create", "not implemented")
+    def create(self):
+        raise SCNotImplemented("Route", "create", "not implemented")
 
-	def verify(self):
-		raise SCNotImplemented("Route", "verify", "not implemented")
+    def verify(self):
+        raise SCNotImplemented("Route", "verify", "not implemented")

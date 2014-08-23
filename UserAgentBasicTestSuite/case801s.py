@@ -30,53 +30,53 @@ from TestCase import TestCase
 import NetworkEventHandler as NEH
 import Log
 
-class case801s (TestCase):
 
-	def config(self):
-		self.name = "Case 801s"
-		self.description = "Presence of the rport parameter in Via"
-		self.isClient = False
-		self.transport = "UDP"
-		self.interactRequired = True
+class case801s(TestCase):
+    def config(self):
+        self.name = "Case 801s"
+        self.description = "Presence of the rport parameter in Via"
+        self.isClient = False
+        self.transport = "UDP"
+        self.interactRequired = True
 
-	def run(self):
-		self.neh = NEH.NetworkEventHandler(self.transport)
-		
-		#if not self.userInteraction("case801s: proceed when ready to send INVITE"):
-		#	neh.closeSock()
-		#	return
+    def run(self):
+        self.neh = NEH.NetworkEventHandler(self.transport)
 
-		print "  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!"
-		req = self.readRequestFromNetwork(self.neh, 60)
+        # if not self.userInteraction("case801s: proceed when ready to send INVITE"):
+        # neh.closeSock()
+        #	return
 
-		self.neh.closeSock()
+        print("  !!!!  PLEASE CALL ANY NUMBER/USER WITHIN 1 MINUTE  !!!!")
+        req = self.readRequestFromNetwork(self.neh, 60)
 
-		if req is None:
-			self.addResult(TestCase.TC_ERROR, "missing INVITE request")
-		else:
-			if req.hasHeaderField("Via"):
-				if req.hasParsedHeaderField("Via"):
-					via = req.getParsedHeaderValue("Via")
-					if via.rport is None:
-						Log.logDebug("case801s: parsed Via does not contain rport", 1)
-						Log.logTest("case801s: Via does not contain rport")
-						self.addResult(TestCase.TC_WARN, "missing rport in Via")
-					else:
-						Log.logDebug("case801s: Via contains rport", 2)
-						Log.logTest("case801s: Via contains rport")
-						self.addResult(TestCase.TC_PASSED, "Via contains rport")
-				else:
-					Log.logDebug("case801s: unable to find parsed Via header", 1)
-					Log.logTest("case801s: unable to find parsed Via header")
-					self.addResult(TestCase.TC_ERROR, "missing parsed Via header")
-			else:
-				Log.logDebug("case801s: unable to find Via header in request", 1)
-				Log.logTest("case801s: unable to find Via header in request")
-				self.addResult(TestCase.TC_ERROR, "missing Via header in request")
+        self.neh.closeSock()
 
-	def onINVITE(self, message):
-		repl = self.createReply(603, "Decline")
-		self.writeMessageToNetwork(self.neh, repl)
-		ack = self.readRequestFromNetwork(self.neh)
-		if ack is None:
-			self.addResult(TestCase.TC_ERROR, "missing ACK for 603 reply")
+        if req is None:
+            self.addResult(TestCase.TC_ERROR, "missing INVITE request")
+        else:
+            if req.hasHeaderField("Via"):
+                if req.hasParsedHeaderField("Via"):
+                    via = req.getParsedHeaderValue("Via")
+                    if via.rport is None:
+                        Log.logDebug("case801s: parsed Via does not contain rport", 1)
+                        Log.logTest("case801s: Via does not contain rport")
+                        self.addResult(TestCase.TC_WARN, "missing rport in Via")
+                    else:
+                        Log.logDebug("case801s: Via contains rport", 2)
+                        Log.logTest("case801s: Via contains rport")
+                        self.addResult(TestCase.TC_PASSED, "Via contains rport")
+                else:
+                    Log.logDebug("case801s: unable to find parsed Via header", 1)
+                    Log.logTest("case801s: unable to find parsed Via header")
+                    self.addResult(TestCase.TC_ERROR, "missing parsed Via header")
+            else:
+                Log.logDebug("case801s: unable to find Via header in request", 1)
+                Log.logTest("case801s: unable to find Via header in request")
+                self.addResult(TestCase.TC_ERROR, "missing Via header in request")
+
+    def onINVITE(self, message):
+        repl = self.createReply(603, "Decline")
+        self.writeMessageToNetwork(self.neh, repl)
+        ack = self.readRequestFromNetwork(self.neh)
+        if ack is None:
+            self.addResult(TestCase.TC_ERROR, "missing ACK for 603 reply")
