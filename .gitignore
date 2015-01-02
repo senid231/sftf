@@ -1,3 +1,9 @@
 /*.log
 /.idea/
 /.project
+/*.pyc
+/*.py~
+/HFH/*.pyc
+/BodyParser/*.pyc
+/UserAgentBasicTestSuite/*.pyc
+/UserAgentBasicTestSuite/*.py~
