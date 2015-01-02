@@ -75,7 +75,7 @@ class XMLEventHandler(EventHandler):
         if mode is None:
             mode = "w"
         Log.logDebug("trying to open:\'" + str(self.filename) + '\', mode:\'' + str(mode) + '\'', 4)
-        self.fileobj = file(self.filename, mode)
+        self.fileobj = open(self.filename, mode)
         Log.logDebug("opened successfully", 4)
         self.fileobj.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
         self.fileobj.write("<sipTrace>\n")
