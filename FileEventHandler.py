@@ -77,7 +77,7 @@ class FileEventHandler(EventHandler):
         if mode is None:
             mode = "r"
         Log.logDebug("trying to open:\'" + str(self.filename) + '\', mode:\'' + str(mode) + '\'', 4)
-        self.fileobj = file(self.filename, mode)
+        self.fileobj = open(self.filename, mode)
         Log.logDebug("opened successfully", 4)
 
     def close(self):

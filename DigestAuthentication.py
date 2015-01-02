@@ -24,7 +24,7 @@
 #
 # $Id: DigestAuthentication.py,v 1.4 2004/03/19 18:37:25 lando Exp $
 #
-import md5
+import hashlib as md5
 
 
 def HA1(username, realm, password):

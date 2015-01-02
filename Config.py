@@ -1,6 +1,6 @@
 # the local IP
 LOCAL_HOSTNAME = ""
-LOCAL_IP = ""
+LOCAL_IP = "127.0.0.1"
 
 # the local port
 LOCAL_PORT = 5060

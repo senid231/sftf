@@ -36,9 +36,9 @@ def init():
     global debugLogFile
     global testsLogFile
     if Config.LOG_DEBUG_FILE != "":
-        debugLogFile = file(Config.LOG_DEBUG_FILE, "a")
+        debugLogFile = open(Config.LOG_DEBUG_FILE, "a")
     if Config.LOG_TESTS_FILE != "":
-        testsLogFile = file(Config.LOG_TESTS_FILE, "a")
+        testsLogFile = open(Config.LOG_TESTS_FILE, "a")
 
 
 def log(message, level, dest, stdout):
